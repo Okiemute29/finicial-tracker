@@ -43,6 +43,67 @@ async function getBudgetCategories(): Promise<BudgetCategory[]> {
   return ((data ?? []) as BudgetCategoryRow[]).map(mapBudgetCategoryRow);
 }
 
+async function getCurrentUserId(): Promise<string> {
+  if (!supabase) throw new Error("Supabase is not configured.");
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const userId = data.session?.user.id;
+  if (!userId) throw new Error("Not authenticated.");
+  return userId;
+}
+
+function toBudgetCategoryPayload(category: BudgetCategory) {
+  return {
+    name: category.name,
+    description: category.description,
+    percentage: category.percentage,
+    color: category.color,
+    sort_order: category.sortOrder,
+  };
+}
+
+async function createBudgetCategory(category: BudgetCategory, userId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("budget_categories").insert({ id: category.id, user_id: userId, ...toBudgetCategoryPayload(category) });
+  if (error) throw error;
+}
+
+async function updateBudgetCategory(category: BudgetCategory): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("budget_categories").update(toBudgetCategoryPayload(category)).eq("id", category.id);
+  if (error) throw error;
+}
+
+async function deleteBudgetCategory(id: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("budget_categories").delete().eq("id", id);
+  if (error) throw error;
+}
+
+async function syncBudgetCategories(previous: BudgetCategory[], next: BudgetCategory[]): Promise<void> {
+  if (!supabase) return;
+
+  const previousIds = new Set(previous.map((category) => category.id));
+  const nextIds = new Set(next.map((category) => category.id));
+
+  const toDelete = previous.filter((category) => !nextIds.has(category.id));
+  const toCreate = next.filter((category) => !previousIds.has(category.id));
+  const toUpdate = next.filter((category) => {
+    const original = previous.find((item) => item.id === category.id);
+    return Boolean(original) && JSON.stringify(original) !== JSON.stringify(category);
+  });
+
+  if (!toDelete.length && !toCreate.length && !toUpdate.length) return;
+
+  const userId = toCreate.length ? await getCurrentUserId() : "";
+
+  await Promise.all([
+    ...toDelete.map((category) => deleteBudgetCategory(category.id)),
+    ...toCreate.map((category) => createBudgetCategory(category, userId)),
+    ...toUpdate.map((category) => updateBudgetCategory(category)),
+  ]);
+}
+
 async function getGoals(): Promise<Goal[]> {
   if (!supabase) return goals;
   const { data, error } = await supabase.from("goals").select("*").order("created_at", { ascending: true });
@@ -50,11 +111,72 @@ async function getGoals(): Promise<Goal[]> {
   return ((data ?? []) as GoalRow[]).map(mapGoalRow);
 }
 
+function toGoalPayload(goal: Goal) {
+  return {
+    name: goal.name,
+    target_amount: goal.targetAmount,
+    current_amount: goal.currentAmount,
+    currency: goal.currency,
+    status: goal.status,
+    due_date: goal.dueDate ?? null,
+  };
+}
+
+async function createGoal(goal: Goal): Promise<void> {
+  if (!supabase) return;
+  const userId = await getCurrentUserId();
+  const { error } = await supabase.from("goals").insert({ id: goal.id, user_id: userId, ...toGoalPayload(goal) });
+  if (error) throw error;
+}
+
+async function updateGoal(goal: Goal): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("goals").update(toGoalPayload(goal)).eq("id", goal.id);
+  if (error) throw error;
+}
+
+async function deleteGoal(id: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("goals").delete().eq("id", id);
+  if (error) throw error;
+}
+
 async function getTransactions(): Promise<Transaction[]> {
   if (!supabase) return transactions;
   const { data, error } = await supabase.from("transactions").select("*").order("date", { ascending: false });
   if (error) throw error;
   return ((data ?? []) as TransactionRow[]).map(mapTransactionRow);
+}
+
+function toTransactionPayload(transaction: Transaction) {
+  return {
+    type: transaction.type,
+    category_id: transaction.categoryId ?? null,
+    description: transaction.description,
+    amount: transaction.amount,
+    currency: transaction.currency,
+    converted_amount: transaction.convertedAmount,
+    date: transaction.date,
+  };
+}
+
+async function createTransaction(transaction: Transaction): Promise<void> {
+  if (!supabase) return;
+  const userId = await getCurrentUserId();
+  const { error } = await supabase.from("transactions").insert({ id: transaction.id, user_id: userId, ...toTransactionPayload(transaction) });
+  if (error) throw error;
+}
+
+async function updateTransaction(transaction: Transaction): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("transactions").update(toTransactionPayload(transaction)).eq("id", transaction.id);
+  if (error) throw error;
+}
+
+async function deleteTransaction(id: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("transactions").delete().eq("id", id);
+  if (error) throw error;
 }
 
 async function getAssets(): Promise<Asset[]> {
@@ -135,4 +257,11 @@ export const wealthService = {
   getDashboardSnapshot,
   updateCachedExchangeRate,
   recordExchangeRateSnapshot,
+  syncBudgetCategories,
+  createGoal,
+  updateGoal,
+  deleteGoal,
+  createTransaction,
+  updateTransaction,
+  deleteTransaction,
 };

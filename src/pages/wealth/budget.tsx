@@ -4,11 +4,10 @@ import Button from "../../component/buttons/button";
 import DataTable from "../../component/table/data.table";
 import Icon from "../../component/icon/icons";
 import Text from "../../component/typography/typography";
-import { Success } from "../../component/toastify/toastify";
 import { formatCurrency } from "../../helpers/currencyHelpers";
 import { budgetPercentageTotal, calculateBudgetAmount, isBudgetBalanced } from "../../helpers/wealthCalculations";
+import { useBudgetCategories } from "../../hooks/wealth/useBudgetCategories";
 import { useWealthSnapshot } from "../../hooks/wealth/useWealthSnapshot";
-import { useWealthStore } from "../../stores/wealthStore";
 import type { BudgetCategory } from "../../models/wealth/types";
 
 const defaultColor = "#0f766e";
@@ -18,9 +17,10 @@ function createDraftCategory(sortOrder: number): BudgetCategory {
 }
 
 export default function BudgetPage() {
-  const { budgetCategories, monthlyIncome, activeExchangeRate, settings } = useWealthSnapshot();
-  const setBudgetCategories = useWealthStore((state) => state.setBudgetCategories);
+  const { monthlyIncome, activeExchangeRate, settings } = useWealthSnapshot();
+  const { budgetCategories, saveBudgetCategories } = useBudgetCategories();
   const [draft, setDraft] = useState<BudgetCategory[]>(budgetCategories);
+  const [saving, setSaving] = useState(false);
 
   const localIncome = monthlyIncome * activeExchangeRate;
   const total = budgetPercentageTotal(draft);
@@ -52,9 +52,10 @@ export default function BudgetPage() {
     setDraft((current) => current.filter((category) => category.id !== id));
   }
 
-  function handleSave() {
-    setBudgetCategories(draft);
-    Success("Budget allocation saved.");
+  async function handleSave() {
+    setSaving(true);
+    await saveBudgetCategories(draft);
+    setSaving(false);
   }
 
   function handleReset() {
@@ -72,8 +73,8 @@ export default function BudgetPage() {
           <StatusBadge label={balanced ? "Balanced" : `${total}% allocated`} variant={balanced ? "balanced" : "warning"} />
           {isDirty ? (
             <>
-              <Button variant="ghost" size="sm" onClick={handleReset} type="button">Reset</Button>
-              <Button size="sm" onClick={handleSave} disabled={!balanced} type="button">Save Changes</Button>
+              <Button variant="ghost" size="sm" onClick={handleReset} disabled={saving} type="button">Reset</Button>
+              <Button size="sm" onClick={handleSave} disabled={!balanced} loading={saving} type="button">Save Changes</Button>
             </>
           ) : null}
         </div>

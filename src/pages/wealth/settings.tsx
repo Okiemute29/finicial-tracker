@@ -2,14 +2,8 @@
 import Select from "../../component/input/select";
 import Toggle from "../../component/input/toggle";
 import Text from "../../component/typography/typography";
+import { currencyOptions } from "../../constants/currencies";
 import { useWealthStore } from "../../stores/wealthStore";
-
-const currencyOptions = [
-  { label: "USD", value: "USD" },
-  { label: "NGN", value: "NGN" },
-  { label: "GBP", value: "GBP" },
-  { label: "EUR", value: "EUR" },
-];
 
 export default function WealthSettingsPage() {
   const settings = useWealthStore((state) => state.settings);
