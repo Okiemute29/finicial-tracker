@@ -1,4 +1,4 @@
-﻿import type { InputHTMLAttributes } from "react";
+﻿import type { InputHTMLAttributes, ReactNode } from "react";
 import Text from "../typography/typography";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
@@ -8,6 +8,7 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   notrequired?: boolean;
   inputClass?: string;
   change?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  trailing?: ReactNode;
 };
 
 export default function AuthGeneralInput({
@@ -20,6 +21,7 @@ export default function AuthGeneralInput({
   className = "",
   id,
   name,
+  trailing,
   ...rest
 }: InputProps) {
   const inputId = id ?? name;
@@ -31,14 +33,17 @@ export default function AuthGeneralInput({
           {!notrequired ? <span className="text-red-500">*</span> : null}
         </label>
       ) : null}
-      <input
-        id={inputId}
-        name={name}
-        required={!notrequired}
-        onChange={change}
-        className={`h-12 w-full rounded-lg border bg-white px-4 text-sm outline-none transition focus:border-teal-700 ${error ? "border-red-500" : "border-slate-200"} ${inputClass}`}
-        {...rest}
-      />
+      <div className="relative">
+        <input
+          id={inputId}
+          name={name}
+          required={!notrequired}
+          onChange={change}
+          className={`h-12 w-full rounded-lg border bg-white px-4 text-sm outline-none transition focus:border-teal-700 ${trailing ? "pr-11" : ""} ${error ? "border-red-500" : "border-slate-200"} ${inputClass}`}
+          {...rest}
+        />
+        {trailing ? <div className="absolute inset-y-0 right-3 flex items-center">{trailing}</div> : null}
+      </div>
       {error ? <Text size="xs" className="mt-1 text-red-500">{error}</Text> : null}
       {!error && description ? <Text size="xs" className="mt-1 text-slate-500">{description}</Text> : null}
     </div>

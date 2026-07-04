@@ -2,9 +2,13 @@
 import { Toaster } from "react-hot-toast";
 import "./App.css";
 import routes from "./constants/routes";
+import { useAuthSession } from "./hooks/auth/useAuthSession";
 import PrivateRoute from "./routeguard/privateroute";
 import RootLayout from "./pages/layout/Root.layout";
 import LoginPage from "./pages/auth/login";
+import SignupPage from "./pages/auth/signup";
+import ForgotPasswordPage from "./pages/auth/forgot-password";
+import ResetPasswordPage from "./pages/auth/reset-password";
 import DashboardPage from "./pages/wealth/dashboard";
 import BudgetPage from "./pages/wealth/budget";
 import GoalsPage from "./pages/wealth/goals";
@@ -19,6 +23,9 @@ const router = createBrowserRouter(
     <>
       <Route path={routes.landing} element={<Navigate to={routes.dashboard} replace />} />
       <Route path={routes.signin} element={<LoginPage />} />
+      <Route path={routes.signup} element={<SignupPage />} />
+      <Route path={routes.forgotPassword} element={<ForgotPasswordPage />} />
+      <Route path={routes.resetPassword} element={<ResetPasswordPage />} />
       <Route element={<PrivateRoute />}>
         <Route element={<RootLayout />}>
           <Route path={routes.dashboard} element={<DashboardPage />} />
@@ -36,6 +43,8 @@ const router = createBrowserRouter(
 );
 
 export default function App() {
+  useAuthSession();
+
   return (
     <>
       <Toaster />

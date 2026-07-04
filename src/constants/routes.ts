@@ -1,6 +1,9 @@
 ﻿const routes = {
   landing: "/",
   signin: "/login",
+  signup: "/signup",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
   dashboard: "/dashboard",
   budget: "/budget",
   goals: "/goals",
