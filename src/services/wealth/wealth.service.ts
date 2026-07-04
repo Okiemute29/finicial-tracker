@@ -1,4 +1,4 @@
-import type { Asset, BudgetCategory, FinancialSettings, Goal, Liability, MonthlyReview, Transaction } from "../../models/wealth/types";
+import type { Asset, BudgetCategory, FinancialSettings, Goal, IncomeSource, Liability, MonthlyReview, Transaction } from "../../models/wealth/types";
 import { assets, budgetCategories, financialSettings, goals, liabilities, monthlyReviews, transactions } from "../../mocks/wealth.mock";
 import { supabase } from "../supabase/client";
 import {
@@ -34,6 +34,46 @@ async function getFinancialSettings(): Promise<FinancialSettings> {
 
   const incomeSources = ((incomeResult.data ?? []) as IncomeSourceRow[]).map(mapIncomeSourceRow);
   return mapFinancialSettingsRow(settingsResult.data as FinancialSettingsRow, incomeSources);
+}
+
+function toFinancialSettingsPayload(settings: FinancialSettings) {
+  return {
+    earning_currency: settings.earningCurrency,
+    spending_currency: settings.spendingCurrency,
+    manual_exchange_rate_enabled: settings.manualExchangeRateEnabled,
+    manual_exchange_rate: settings.manualExchangeRate,
+    cached_exchange_rate: settings.cachedExchangeRate,
+  };
+}
+
+async function updateFinancialSettings(settings: FinancialSettings): Promise<void> {
+  if (!supabase) return;
+  const userId = await getCurrentUserId();
+  const { error } = await supabase.from("financial_settings").update(toFinancialSettingsPayload(settings)).eq("user_id", userId);
+  if (error) throw error;
+}
+
+function toIncomeSourcePayload(source: IncomeSource) {
+  return { label: source.label, amount: source.amount, currency: source.currency, cadence: source.cadence };
+}
+
+async function createIncomeSource(source: IncomeSource): Promise<void> {
+  if (!supabase) return;
+  const userId = await getCurrentUserId();
+  const { error } = await supabase.from("income_sources").insert({ id: source.id, user_id: userId, ...toIncomeSourcePayload(source) });
+  if (error) throw error;
+}
+
+async function updateIncomeSource(source: IncomeSource): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("income_sources").update(toIncomeSourcePayload(source)).eq("id", source.id);
+  if (error) throw error;
+}
+
+async function deleteIncomeSource(id: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("income_sources").delete().eq("id", id);
+  if (error) throw error;
 }
 
 async function getBudgetCategories(): Promise<BudgetCategory[]> {
@@ -268,7 +308,8 @@ async function upsertMonthlyReview(review: MonthlyReview): Promise<void> {
 
 async function updateCachedExchangeRate(rate: number): Promise<void> {
   if (!supabase) return;
-  const { error } = await supabase.from("financial_settings").update({ cached_exchange_rate: rate });
+  const userId = await getCurrentUserId();
+  const { error } = await supabase.from("financial_settings").update({ cached_exchange_rate: rate }).eq("user_id", userId);
   if (error) throw error;
 }
 
@@ -337,4 +378,8 @@ export const wealthService = {
   updateLiability,
   deleteLiability,
   upsertMonthlyReview,
+  updateFinancialSettings,
+  createIncomeSource,
+  updateIncomeSource,
+  deleteIncomeSource,
 };

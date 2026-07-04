@@ -28,14 +28,15 @@ export function calculateNetWorth(assets: Asset[], liabilities: Liability[]) {
 }
 
 export function summarizeTransactions(transactions: Transaction[]) {
-  return transactions.reduce(
+  const totals = transactions.reduce(
     (summary, transaction) => {
       if (transaction.type === "income") summary.income += transaction.convertedAmount;
       if (transaction.type === "expense") summary.expenses += transaction.convertedAmount;
       return summary;
     },
-    { income: 0, expenses: 0, savings: 0 },
+    { income: 0, expenses: 0 },
   );
+  return { ...totals, savings: totals.income - totals.expenses };
 }
 
 export function summarizeMonthlyTransactions(transactions: Transaction[], month: string) {
