@@ -193,6 +193,54 @@ async function getLiabilities(): Promise<Liability[]> {
   return ((data ?? []) as LiabilityRow[]).map(mapLiabilityRow);
 }
 
+function toNetWorthItemPayload(item: Asset | Liability) {
+  return { name: item.name, value: item.value, currency: item.currency };
+}
+
+async function createNetWorthItem(table: "assets" | "liabilities", item: Asset | Liability, userId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from(table).insert({ id: item.id, user_id: userId, ...toNetWorthItemPayload(item) });
+  if (error) throw error;
+}
+
+async function updateNetWorthItem(table: "assets" | "liabilities", item: Asset | Liability): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from(table).update(toNetWorthItemPayload(item)).eq("id", item.id);
+  if (error) throw error;
+}
+
+async function deleteNetWorthItem(table: "assets" | "liabilities", id: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from(table).delete().eq("id", id);
+  if (error) throw error;
+}
+
+async function createAsset(asset: Asset): Promise<void> {
+  const userId = await getCurrentUserId();
+  await createNetWorthItem("assets", asset, userId);
+}
+
+async function updateAsset(asset: Asset): Promise<void> {
+  await updateNetWorthItem("assets", asset);
+}
+
+async function deleteAsset(id: string): Promise<void> {
+  await deleteNetWorthItem("assets", id);
+}
+
+async function createLiability(liability: Liability): Promise<void> {
+  const userId = await getCurrentUserId();
+  await createNetWorthItem("liabilities", liability, userId);
+}
+
+async function updateLiability(liability: Liability): Promise<void> {
+  await updateNetWorthItem("liabilities", liability);
+}
+
+async function deleteLiability(id: string): Promise<void> {
+  await deleteNetWorthItem("liabilities", id);
+}
+
 async function getMonthlyReviews(): Promise<MonthlyReview[]> {
   if (!supabase) return monthlyReviews;
   const { data, error } = await supabase.from("monthly_reviews").select("*").order("month", { ascending: false });
@@ -264,4 +312,10 @@ export const wealthService = {
   createTransaction,
   updateTransaction,
   deleteTransaction,
+  createAsset,
+  updateAsset,
+  deleteAsset,
+  createLiability,
+  updateLiability,
+  deleteLiability,
 };

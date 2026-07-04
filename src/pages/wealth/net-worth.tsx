@@ -1,11 +1,70 @@
-﻿import DataTable from "../../component/table/data.table";
+import { useState } from "react";
+import Button from "../../component/buttons/button";
+import DataTable from "../../component/table/data.table";
+import Icon from "../../component/icon/icons";
 import MetricCard from "../../component/wealth/dashboard/MetricCard";
 import Text from "../../component/typography/typography";
+import AssetLiabilityFormModal from "../../component/wealth/networth/AssetLiabilityFormModal";
+import type { NetWorthItemFormValues } from "../../component/wealth/networth/AssetLiabilityFormModal";
 import { formatCurrency } from "../../helpers/currencyHelpers";
+import { useNetWorth } from "../../hooks/wealth/useNetWorth";
 import { useWealthSnapshot } from "../../hooks/wealth/useWealthSnapshot";
+import type { Asset, Liability } from "../../models/wealth/types";
 
 export default function NetWorthPage() {
-  const { assets, liabilities, netWorth, settings } = useWealthSnapshot();
+  const { netWorth, settings } = useWealthSnapshot();
+  const { assets, liabilities, createAsset, updateAsset, deleteAsset, createLiability, updateLiability, deleteLiability } = useNetWorth();
+
+  const [assetModalOpen, setAssetModalOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
+  const [liabilityModalOpen, setLiabilityModalOpen] = useState(false);
+  const [editingLiability, setEditingLiability] = useState<Liability | undefined>(undefined);
+  const [submitting, setSubmitting] = useState(false);
+
+  function openCreateAsset() {
+    setEditingAsset(undefined);
+    setAssetModalOpen(true);
+  }
+
+  function openEditAsset(asset: Asset) {
+    setEditingAsset(asset);
+    setAssetModalOpen(true);
+  }
+
+  function openCreateLiability() {
+    setEditingLiability(undefined);
+    setLiabilityModalOpen(true);
+  }
+
+  function openEditLiability(liability: Liability) {
+    setEditingLiability(liability);
+    setLiabilityModalOpen(true);
+  }
+
+  async function handleAssetSubmit(values: NetWorthItemFormValues) {
+    setSubmitting(true);
+    const success = editingAsset ? await updateAsset(editingAsset, values) : await createAsset(values);
+    setSubmitting(false);
+    if (success) setAssetModalOpen(false);
+  }
+
+  async function handleLiabilitySubmit(values: NetWorthItemFormValues) {
+    setSubmitting(true);
+    const success = editingLiability ? await updateLiability(editingLiability, values) : await createLiability(values);
+    setSubmitting(false);
+    if (success) setLiabilityModalOpen(false);
+  }
+
+  async function handleDeleteAsset(asset: Asset) {
+    if (!window.confirm(`Delete "${asset.name}"? This can't be undone.`)) return;
+    await deleteAsset(asset);
+  }
+
+  async function handleDeleteLiability(liability: Liability) {
+    if (!window.confirm(`Delete "${liability.name}"? This can't be undone.`)) return;
+    await deleteLiability(liability);
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -19,14 +78,61 @@ export default function NetWorthPage() {
       </div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <Text size="lg" className="mb-3 font-semibold text-slate-950">Assets</Text>
-          <DataTable columns={[{ header: "Asset" }, { header: "Value" }]} data={assets} renderRow={(asset) => <><td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium">{asset.name}</td><td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">{formatCurrency(asset.value, asset.currency)}</td></>} />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <Text size="lg" className="font-semibold text-slate-950">Assets</Text>
+            <Button variant="outline" size="sm" leftIcon="plus" onClick={openCreateAsset} type="button">Add asset</Button>
+          </div>
+          <DataTable
+            columns={[{ header: "Asset" }, { header: "Value" }, { header: "" }]}
+            data={assets}
+            renderRow={(asset) => (
+              <>
+                <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium">{asset.name}</td>
+                <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(asset.value, asset.currency)}</td>
+                <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">
+                  <div className="flex items-center justify-end gap-2">
+                    <button type="button" onClick={() => openEditAsset(asset)} className="text-slate-400 transition hover:text-teal-700" aria-label={`Edit ${asset.name}`}>
+                      <Icon name="edit" iconClass="h-4 w-4" />
+                    </button>
+                    <button type="button" onClick={() => handleDeleteAsset(asset)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${asset.name}`}>
+                      <Icon name="trash" iconClass="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </>
+            )}
+          />
         </section>
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <Text size="lg" className="mb-3 font-semibold text-slate-950">Liabilities</Text>
-          <DataTable columns={[{ header: "Liability" }, { header: "Value" }]} data={liabilities} renderRow={(liability) => <><td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium">{liability.name}</td><td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">{formatCurrency(liability.value, liability.currency)}</td></>} />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <Text size="lg" className="font-semibold text-slate-950">Liabilities</Text>
+            <Button variant="outline" size="sm" leftIcon="plus" onClick={openCreateLiability} type="button">Add liability</Button>
+          </div>
+          <DataTable
+            columns={[{ header: "Liability" }, { header: "Value" }, { header: "" }]}
+            data={liabilities}
+            renderRow={(liability) => (
+              <>
+                <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium">{liability.name}</td>
+                <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(liability.value, liability.currency)}</td>
+                <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">
+                  <div className="flex items-center justify-end gap-2">
+                    <button type="button" onClick={() => openEditLiability(liability)} className="text-slate-400 transition hover:text-teal-700" aria-label={`Edit ${liability.name}`}>
+                      <Icon name="edit" iconClass="h-4 w-4" />
+                    </button>
+                    <button type="button" onClick={() => handleDeleteLiability(liability)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${liability.name}`}>
+                      <Icon name="trash" iconClass="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </>
+            )}
+          />
         </section>
       </div>
+
+      <AssetLiabilityFormModal kind="asset" isOpen={assetModalOpen} onClose={() => setAssetModalOpen(false)} onSubmit={handleAssetSubmit} initialValue={editingAsset} submitting={submitting} />
+      <AssetLiabilityFormModal kind="liability" isOpen={liabilityModalOpen} onClose={() => setLiabilityModalOpen(false)} onSubmit={handleLiabilitySubmit} initialValue={editingLiability} submitting={submitting} />
     </div>
   );
 }
