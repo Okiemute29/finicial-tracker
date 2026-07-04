@@ -78,6 +78,30 @@ async function getMonthlyReviews(): Promise<MonthlyReview[]> {
   return ((data ?? []) as MonthlyReviewRow[]).map(mapMonthlyReviewRow);
 }
 
+async function updateCachedExchangeRate(rate: number): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("financial_settings").update({ cached_exchange_rate: rate });
+  if (error) throw error;
+}
+
+type ExchangeRateSnapshotInput = {
+  baseCurrency: string;
+  quoteCurrency: string;
+  rate: number;
+  source: "api" | "manual" | "cached";
+};
+
+async function recordExchangeRateSnapshot(input: ExchangeRateSnapshotInput): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.from("exchange_rate_snapshots").insert({
+    base_currency: input.baseCurrency,
+    quote_currency: input.quoteCurrency,
+    rate: input.rate,
+    source: input.source,
+  });
+  if (error) throw error;
+}
+
 async function getDashboardSnapshot() {
   const [settings, budget, goalList, transactionList, assetList, liabilityList, reviews] = await Promise.all([
     getFinancialSettings(),
@@ -109,4 +133,6 @@ export const wealthService = {
   getLiabilities,
   getMonthlyReviews,
   getDashboardSnapshot,
+  updateCachedExchangeRate,
+  recordExchangeRateSnapshot,
 };

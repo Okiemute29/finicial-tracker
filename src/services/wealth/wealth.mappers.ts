@@ -20,6 +20,7 @@ export type IncomeSourceRow = {
 export type BudgetCategoryRow = {
   id: string;
   name: string;
+  description: string;
   percentage: number;
   color: string;
   sort_order: number;
@@ -90,6 +91,7 @@ export function mapBudgetCategoryRow(row: BudgetCategoryRow): BudgetCategory {
   return {
     id: row.id,
     name: row.name,
+    description: row.description,
     percentage: Number(row.percentage),
     color: row.color,
     sortOrder: row.sort_order,

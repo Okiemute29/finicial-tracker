@@ -1,7 +1,8 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import StatusBadge from "../../component/badge/statusbadge";
 import Button from "../../component/buttons/button";
 import DataTable from "../../component/table/data.table";
+import Icon from "../../component/icon/icons";
 import Text from "../../component/typography/typography";
 import { Success } from "../../component/toastify/toastify";
 import { formatCurrency } from "../../helpers/currencyHelpers";
@@ -9,6 +10,12 @@ import { budgetPercentageTotal, calculateBudgetAmount, isBudgetBalanced } from "
 import { useWealthSnapshot } from "../../hooks/wealth/useWealthSnapshot";
 import { useWealthStore } from "../../stores/wealthStore";
 import type { BudgetCategory } from "../../models/wealth/types";
+
+const defaultColor = "#0f766e";
+
+function createDraftCategory(sortOrder: number): BudgetCategory {
+  return { id: crypto.randomUUID(), name: "New category", description: "", percentage: 0, color: defaultColor, sortOrder };
+}
 
 export default function BudgetPage() {
   const { budgetCategories, monthlyIncome, activeExchangeRate, settings } = useWealthSnapshot();
@@ -20,9 +27,29 @@ export default function BudgetPage() {
   const balanced = isBudgetBalanced(draft);
   const isDirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(budgetCategories), [draft, budgetCategories]);
 
+  function handleNameChange(id: string, value: string) {
+    setDraft((current) => current.map((category) => (category.id === id ? { ...category, name: value } : category)));
+  }
+
+  function handleDescriptionChange(id: string, value: string) {
+    setDraft((current) => current.map((category) => (category.id === id ? { ...category, description: value } : category)));
+  }
+
   function handlePercentageChange(id: string, value: string) {
     const percentage = Number(value);
     setDraft((current) => current.map((category) => (category.id === id ? { ...category, percentage: Number.isFinite(percentage) ? percentage : 0 } : category)));
+  }
+
+  function handleColorChange(id: string, value: string) {
+    setDraft((current) => current.map((category) => (category.id === id ? { ...category, color: value } : category)));
+  }
+
+  function handleAddCategory() {
+    setDraft((current) => [...current, createDraftCategory(current.length + 1)]);
+  }
+
+  function handleDeleteCategory(id: string) {
+    setDraft((current) => current.filter((category) => category.id !== id));
   }
 
   function handleSave() {
@@ -59,11 +86,27 @@ export default function BudgetPage() {
       ) : null}
 
       <DataTable
-        columns={[{ header: "Category" }, { header: "Percentage" }, { header: "Monthly Amount" }, { header: "Color" }]}
+        columns={[{ header: "Category" }, { header: "Purpose" }, { header: "Percentage" }, { header: "Monthly Amount" }, { header: "Color" }, { header: "" }]}
         data={draft}
         renderRow={(category) => (
           <>
-            <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium text-slate-900">{category.name}</td>
+            <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium text-slate-900">
+              <input
+                type="text"
+                value={category.name}
+                onChange={(event) => handleNameChange(category.id, event.target.value)}
+                className="h-10 w-full min-w-32 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700"
+              />
+            </td>
+            <td className="border-y border-slate-200 px-4 py-4">
+              <input
+                type="text"
+                value={category.description}
+                onChange={(event) => handleDescriptionChange(category.id, event.target.value)}
+                placeholder="What is this for?"
+                className="h-10 w-full min-w-48 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700"
+              />
+            </td>
             <td className="border-y border-slate-200 px-4 py-4">
               <input
                 type="number"
@@ -76,10 +119,24 @@ export default function BudgetPage() {
               <span className="ml-1 text-slate-500">%</span>
             </td>
             <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(calculateBudgetAmount(localIncome, category.percentage), settings.spendingCurrency)}</td>
-            <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4"><span className="block h-5 w-5 rounded-full" style={{ backgroundColor: category.color }} /></td>
+            <td className="border-y border-slate-200 px-4 py-4">
+              <input
+                type="color"
+                value={category.color}
+                onChange={(event) => handleColorChange(category.id, event.target.value)}
+                className="h-9 w-9 cursor-pointer rounded-full border border-slate-200 p-0.5"
+              />
+            </td>
+            <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4 text-right">
+              <button type="button" onClick={() => handleDeleteCategory(category.id)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${category.name}`}>
+                <Icon name="trash" iconClass="h-4 w-4" />
+              </button>
+            </td>
           </>
         )}
       />
+
+      <Button variant="outline" size="sm" leftIcon="plus" onClick={handleAddCategory} type="button">Add category</Button>
     </div>
   );
 }

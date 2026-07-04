@@ -21,6 +21,7 @@ export type FinancialSettings = {
 export type BudgetCategory = {
   id: string;
   name: string;
+  description: string;
   percentage: number;
   color: string;
   sortOrder: number;

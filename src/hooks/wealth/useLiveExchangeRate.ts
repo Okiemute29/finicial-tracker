@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { exchangeRateService } from "../../services/exchangeRate/exchangeRate.service";
+import { wealthService } from "../../services/wealth/wealth.service";
 import { useWealthStore } from "../../stores/wealthStore";
 
 export function useLiveExchangeRate() {
@@ -21,6 +22,15 @@ export function useLiveExchangeRate() {
         if (!active) return;
         const { settings, setSettings } = useWealthStore.getState();
         setSettings({ ...settings, cachedExchangeRate: rate });
+
+        wealthService.updateCachedExchangeRate(rate).catch(() => {
+          // Best-effort persistence; the in-memory rate is already applied.
+        });
+        wealthService
+          .recordExchangeRateSnapshot({ baseCurrency: earningCurrency, quoteCurrency: spendingCurrency, rate, source: "api" })
+          .catch(() => {
+            // Best-effort logging; missing a snapshot doesn't affect current behavior.
+          });
       })
       .catch(() => {
         // Live fetch failed; the existing cachedExchangeRate remains the fallback.

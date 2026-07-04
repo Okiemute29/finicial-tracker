@@ -14,11 +14,13 @@ export const financialSettings: FinancialSettings = {
 };
 
 export const budgetCategories: BudgetCategory[] = [
-  { id: "budget-1", name: "Rent", percentage: 30, color: "#2563eb", sortOrder: 1 },
-  { id: "budget-2", name: "Savings", percentage: 20, color: "#0f766e", sortOrder: 2 },
-  { id: "budget-3", name: "Family", percentage: 15, color: "#c2410c", sortOrder: 3 },
-  { id: "budget-4", name: "Lifestyle", percentage: 15, color: "#7c3aed", sortOrder: 4 },
-  { id: "budget-5", name: "Investments", percentage: 20, color: "#16a34a", sortOrder: 5 },
+  { id: "budget-1", name: "🏠 Rent Fund", description: "Save for next year's rent.", percentage: 12, color: "#2563eb", sortOrder: 1 },
+  { id: "budget-2", name: "🚨 Emergency Fund", description: "Build until you have 6 months of expenses, then redirect this percentage to investing.", percentage: 12, color: "#dc2626", sortOrder: 2 },
+  { id: "budget-3", name: "📈 Investments", description: "Long-term wealth (ETFs, index funds, etc.).", percentage: 20, color: "#16a34a", sortOrder: 3 },
+  { id: "budget-4", name: "💍 Wedding Fund", description: "Save for your future wedding.", percentage: 8, color: "#db2777", sortOrder: 4 },
+  { id: "budget-5", name: "🍜 Living Expenses", description: "Food, transport, utilities, family support, internet, etc.", percentage: 38, color: "#ea580c", sortOrder: 5 },
+  { id: "budget-6", name: "🚀 Business & Self Development", description: "Courses, AI tools, your startup, agency, equipment.", percentage: 7, color: "#7c3aed", sortOrder: 6 },
+  { id: "budget-7", name: "🎉 Lifestyle", description: "Entertainment, clothes, eating out, guilt-free spending.", percentage: 3, color: "#0f766e", sortOrder: 7 },
 ];
 
 export const goals: Goal[] = [
