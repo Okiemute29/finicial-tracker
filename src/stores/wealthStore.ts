@@ -29,6 +29,7 @@ type WealthState = {
   setTransactions: (items: Transaction[]) => void;
   setAssets: (items: Asset[]) => void;
   setLiabilities: (items: Liability[]) => void;
+  setMonthlyReviews: (items: MonthlyReview[]) => void;
   setSettings: (settings: FinancialSettings) => void;
   loadWealthData: () => Promise<void>;
   reset: () => void;
@@ -53,6 +54,7 @@ export const useWealthStore = create<WealthState>((set) => ({
   setTransactions: (items) => set({ transactions: items }),
   setAssets: (items) => set({ assets: items }),
   setLiabilities: (items) => set({ liabilities: items }),
+  setMonthlyReviews: (items) => set({ monthlyReviews: items }),
   setSettings: (settings) => set({ settings }),
   loadWealthData: async () => {
     set({ status: "loading", error: null });

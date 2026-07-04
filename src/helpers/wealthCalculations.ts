@@ -37,3 +37,7 @@ export function summarizeTransactions(transactions: Transaction[]) {
     { income: 0, expenses: 0, savings: 0 },
   );
 }
+
+export function summarizeMonthlyTransactions(transactions: Transaction[], month: string) {
+  return summarizeTransactions(transactions.filter((transaction) => transaction.date.startsWith(month)));
+}

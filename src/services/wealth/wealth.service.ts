@@ -248,6 +248,24 @@ async function getMonthlyReviews(): Promise<MonthlyReview[]> {
   return ((data ?? []) as MonthlyReviewRow[]).map(mapMonthlyReviewRow);
 }
 
+async function upsertMonthlyReview(review: MonthlyReview): Promise<void> {
+  if (!supabase) return;
+  const userId = await getCurrentUserId();
+  const { error } = await supabase.from("monthly_reviews").upsert(
+    {
+      id: review.id,
+      user_id: userId,
+      month: `${review.month}-01`,
+      planned_spend: review.plannedSpend,
+      actual_spend: review.actualSpend,
+      savings: review.savings,
+      notes: review.notes,
+    },
+    { onConflict: "user_id,month" },
+  );
+  if (error) throw error;
+}
+
 async function updateCachedExchangeRate(rate: number): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from("financial_settings").update({ cached_exchange_rate: rate });
@@ -318,4 +336,5 @@ export const wealthService = {
   createLiability,
   updateLiability,
   deleteLiability,
+  upsertMonthlyReview,
 };
