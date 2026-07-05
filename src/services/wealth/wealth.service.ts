@@ -399,7 +399,7 @@ async function recordExchangeRateSnapshot(input: ExchangeRateSnapshotInput): Pro
 }
 
 async function getDashboardSnapshot() {
-  const [settings, budget, goalList, transactionList, assetList, liabilityList, reviews] = await Promise.all([
+  const [settings, budget, goalList, transactionList, assetList, liabilityList, reviews, snapshots] = await Promise.all([
     getFinancialSettings(),
     getBudgetCategories(),
     getGoals(),
@@ -407,6 +407,7 @@ async function getDashboardSnapshot() {
     getAssets(),
     getLiabilities(),
     getMonthlyReviews(),
+    getNetWorthSnapshots(),
   ]);
 
   return {
@@ -417,6 +418,7 @@ async function getDashboardSnapshot() {
     assets: assetList,
     liabilities: liabilityList,
     monthlyReviews: reviews,
+    netWorthSnapshots: snapshots,
   };
 }
 

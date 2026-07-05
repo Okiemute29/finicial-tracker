@@ -1,12 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Asset, BudgetCategory, Liability, Transaction } from "../models/wealth/types";
+import type { Asset, BudgetCategory, Goal, Liability, NetWorthSnapshot, Transaction } from "../models/wealth/types";
 import {
   budgetPercentageTotal,
   calculateBudgetAmount,
+  calculateFinancialHealthScore,
   calculateGoalProgress,
+  calculateInvestmentRate,
+  calculateMonthsRemaining,
   calculateNetWorth,
+  calculateNetWorthTrend,
   calculateOverspend,
   calculateProjectedCompletion,
+  calculateSavingsRate,
+  generateCoachMessage,
+  getUpcomingGoalEvents,
   groupAssetsByCategory,
   isBudgetBalanced,
   resolveGoalTargetAmount,
@@ -20,6 +27,28 @@ function makeCategory(overrides: Partial<BudgetCategory> = {}): BudgetCategory {
 
 function makeTransaction(overrides: Partial<Transaction> = {}): Transaction {
   return { id: "tx-1", type: "expense", description: "Groceries", amount: 100, currency: "USD", convertedAmount: 100, date: "2026-07-01", ...overrides };
+}
+
+function makeGoal(overrides: Partial<Goal> = {}): Goal {
+  return {
+    id: "goal-1",
+    name: "Goal",
+    description: "",
+    category: "custom",
+    priority: "medium",
+    contributionPercentage: 0,
+    targetAmount: 1000,
+    currentAmount: 0,
+    currency: "USD",
+    status: "active",
+    targetType: "fixed",
+    isAutoFunded: false,
+    ...overrides,
+  };
+}
+
+function makeSnapshot(overrides: Partial<NetWorthSnapshot> = {}): NetWorthSnapshot {
+  return { id: "snap-1", capturedAt: "2026-01-01", totalAssets: 1000, totalLiabilities: 200, netWorth: 800, ...overrides };
 }
 
 describe("budgetPercentageTotal", () => {
@@ -206,5 +235,148 @@ describe("groupAssetsByCategory", () => {
   it("returns empty groups for an empty list", () => {
     const grouped = groupAssetsByCategory([]);
     expect(grouped).toEqual({ financial: [], physical: [], business: [], other: [] });
+  });
+});
+
+describe("calculateMonthsRemaining", () => {
+  it("computes months needed to close the remaining gap", () => {
+    expect(calculateMonthsRemaining(0, 1200, 400)).toBe(3);
+  });
+
+  it("rounds up a partial month", () => {
+    expect(calculateMonthsRemaining(0, 1000, 400)).toBe(3);
+  });
+
+  it("returns null when already at or past target", () => {
+    expect(calculateMonthsRemaining(1200, 1000, 400)).toBeNull();
+  });
+
+  it("returns null with no monthly contribution", () => {
+    expect(calculateMonthsRemaining(0, 1000, 0)).toBeNull();
+  });
+});
+
+describe("calculateSavingsRate", () => {
+  it("sums contribution percentages of auto-funded savings goals only", () => {
+    const goals = [
+      makeGoal({ category: "rent", contributionPercentage: 12, isAutoFunded: true }),
+      makeGoal({ category: "emergency", contributionPercentage: 12, isAutoFunded: true }),
+      makeGoal({ category: "wedding", contributionPercentage: 8, isAutoFunded: true }),
+      makeGoal({ category: "investment", contributionPercentage: 20, isAutoFunded: true }),
+      makeGoal({ category: "business", contributionPercentage: 7, isAutoFunded: true }),
+      makeGoal({ category: "custom", contributionPercentage: 50, isAutoFunded: true }),
+    ];
+    expect(calculateSavingsRate(goals)).toBe(59);
+  });
+
+  it("excludes goals that aren't auto-funded", () => {
+    const goals = [makeGoal({ category: "rent", contributionPercentage: 12, isAutoFunded: false })];
+    expect(calculateSavingsRate(goals)).toBe(0);
+  });
+
+  it("returns 0 for no goals", () => {
+    expect(calculateSavingsRate([])).toBe(0);
+  });
+});
+
+describe("calculateInvestmentRate", () => {
+  it("returns the auto-funded investment goal's contribution percentage", () => {
+    const goals = [makeGoal({ category: "investment", contributionPercentage: 20, isAutoFunded: true })];
+    expect(calculateInvestmentRate(goals)).toBe(20);
+  });
+
+  it("returns 0 when there is no auto-funded investment goal", () => {
+    expect(calculateInvestmentRate([makeGoal({ category: "investment", contributionPercentage: 20, isAutoFunded: false })])).toBe(0);
+    expect(calculateInvestmentRate([])).toBe(0);
+  });
+});
+
+describe("calculateNetWorthTrend", () => {
+  it("returns the percent change from the earliest to the latest snapshot", () => {
+    const snapshots = [makeSnapshot({ capturedAt: "2026-01-01", netWorth: 1000 }), makeSnapshot({ capturedAt: "2026-02-01", netWorth: 1100 })];
+    expect(calculateNetWorthTrend(snapshots)).toBe(10);
+  });
+
+  it("returns null with fewer than 2 snapshots", () => {
+    expect(calculateNetWorthTrend([makeSnapshot()])).toBeNull();
+    expect(calculateNetWorthTrend([])).toBeNull();
+  });
+
+  it("sorts snapshots by date regardless of input order", () => {
+    const snapshots = [makeSnapshot({ capturedAt: "2026-02-01", netWorth: 1200 }), makeSnapshot({ capturedAt: "2026-01-01", netWorth: 1000 })];
+    expect(calculateNetWorthTrend(snapshots)).toBe(20);
+  });
+});
+
+describe("calculateFinancialHealthScore", () => {
+  it("averages the four sub-scores", () => {
+    const score = calculateFinancialHealthScore({
+      emergencyProgress: 100,
+      savingsRate: 50,
+      totalAssets: 1000,
+      totalLiabilities: 0,
+      netWorthTrend: 50,
+    });
+    expect(score).toBe(100);
+  });
+
+  it("treats missing net worth trend as neutral", () => {
+    const score = calculateFinancialHealthScore({
+      emergencyProgress: 0,
+      savingsRate: 0,
+      totalAssets: 0,
+      totalLiabilities: 0,
+      netWorthTrend: null,
+    });
+    expect(score).toBe(Math.round((0 + 0 + 100 + 50) / 4));
+  });
+});
+
+describe("getUpcomingGoalEvents", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns goals with a due date within the horizon, sorted ascending", () => {
+    const goals = [
+      makeGoal({ id: "g1", dueDate: "2026-08-01" }),
+      makeGoal({ id: "g2", dueDate: "2026-03-01" }),
+      makeGoal({ id: "g3", dueDate: "2028-01-01" }),
+      makeGoal({ id: "g4", dueDate: undefined }),
+    ];
+    expect(getUpcomingGoalEvents(goals).map((goal) => goal.id)).toEqual(["g2", "g1"]);
+  });
+
+  it("excludes due dates in the past", () => {
+    expect(getUpcomingGoalEvents([makeGoal({ dueDate: "2025-01-01" })])).toEqual([]);
+  });
+});
+
+describe("generateCoachMessage", () => {
+  const settings = { monthlyLivingExpenses: 500000, emergencyFundMonths: 6 };
+
+  it("includes the savings rate and mentions rent and wedding goal progress", () => {
+    const goals = [
+      makeGoal({ category: "rent", contributionPercentage: 12, isAutoFunded: true, name: "Annual Rent", targetAmount: 1200, currentAmount: 0 }),
+      makeGoal({ category: "wedding", contributionPercentage: 8, isAutoFunded: true, name: "Wedding Fund", targetAmount: 9600, currentAmount: 0 }),
+    ];
+    const message = generateCoachMessage({ fullName: "Robert", goals, monthlyIncomeLocal: 1000, settings });
+    expect(message).toContain("Robert");
+    expect(message).toMatch(/savings rate is 20%/);
+    expect(message).toContain("on track to fund annual rent by");
+    expect(message).toMatch(/reach your wedding fund in \d+ year/);
+    expect(message).toContain("Keep going.");
+  });
+
+  it("says the rent goal is already funded when current amount meets target", () => {
+    const goals = [makeGoal({ category: "rent", contributionPercentage: 12, isAutoFunded: true, name: "Annual Rent", targetAmount: 100, currentAmount: 200 })];
+    const message = generateCoachMessage({ fullName: null, goals, monthlyIncomeLocal: 1000, settings });
+    expect(message).toContain("already fully funded");
+    expect(message.startsWith("Good")).toBe(true);
   });
 });

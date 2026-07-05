@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Asset, BudgetCategory, FinancialSettings, Goal, Liability, MonthlyReview, Transaction } from "../models/wealth/types";
+import type { Asset, BudgetCategory, FinancialSettings, Goal, Liability, MonthlyReview, NetWorthSnapshot, Transaction } from "../models/wealth/types";
 import { wealthService } from "../services/wealth/wealth.service";
 
 type WealthStatus = "idle" | "loading" | "loaded" | "error";
@@ -29,12 +29,14 @@ type WealthState = {
   assets: Asset[];
   liabilities: Liability[];
   monthlyReviews: MonthlyReview[];
+  netWorthSnapshots: NetWorthSnapshot[];
   setBudgetCategories: (categories: BudgetCategory[]) => void;
   setGoals: (items: Goal[]) => void;
   setTransactions: (items: Transaction[]) => void;
   setAssets: (items: Asset[]) => void;
   setLiabilities: (items: Liability[]) => void;
   setMonthlyReviews: (items: MonthlyReview[]) => void;
+  setNetWorthSnapshots: (items: NetWorthSnapshot[]) => void;
   setSettings: (settings: FinancialSettings) => void;
   loadWealthData: () => Promise<void>;
   reset: () => void;
@@ -48,6 +50,7 @@ const initialData = {
   assets: [] as Asset[],
   liabilities: [] as Liability[],
   monthlyReviews: [] as MonthlyReview[],
+  netWorthSnapshots: [] as NetWorthSnapshot[],
 };
 
 export const useWealthStore = create<WealthState>((set) => ({
@@ -60,6 +63,7 @@ export const useWealthStore = create<WealthState>((set) => ({
   setAssets: (items) => set({ assets: items }),
   setLiabilities: (items) => set({ liabilities: items }),
   setMonthlyReviews: (items) => set({ monthlyReviews: items }),
+  setNetWorthSnapshots: (items) => set({ netWorthSnapshots: items }),
   setSettings: (settings) => set({ settings }),
   loadWealthData: async () => {
     set({ status: "loading", error: null });
@@ -74,6 +78,7 @@ export const useWealthStore = create<WealthState>((set) => ({
         assets: snapshot.assets,
         liabilities: snapshot.liabilities,
         monthlyReviews: snapshot.monthlyReviews,
+        netWorthSnapshots: snapshot.netWorthSnapshots,
       });
     } catch (error) {
       set({ status: "error", error: error instanceof Error ? error.message : "Failed to load wealth data." });
