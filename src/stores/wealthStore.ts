@@ -6,11 +6,16 @@ type WealthStatus = "idle" | "loading" | "loaded" | "error";
 
 const emptySettings: FinancialSettings = {
   userId: "",
+  fullName: null,
   earningCurrency: "USD",
   spendingCurrency: "USD",
   manualExchangeRateEnabled: false,
   manualExchangeRate: null,
   cachedExchangeRate: 1,
+  monthlyLivingExpenses: 500000,
+  emergencyFundMonths: 6,
+  emailAlertsEnabled: true,
+  theme: "system",
   incomeSources: [],
 };
 

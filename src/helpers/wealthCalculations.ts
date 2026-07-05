@@ -1,4 +1,5 @@
-﻿import type { Asset, BudgetCategory, Goal, Liability, Transaction } from "../models/wealth/types";
+﻿import { assetCategoryGroupLookup } from "../constants/netWorthCategories";
+import type { Asset, BudgetCategory, FinancialSettings, Goal, Liability, Transaction } from "../models/wealth/types";
 
 export function budgetPercentageTotal(categories: BudgetCategory[]) {
   return categories.reduce((total, category) => total + category.percentage, 0);
@@ -45,4 +46,34 @@ export function summarizeMonthlyTransactions(transactions: Transaction[], month:
 
 export function calculateOverspend(actualSpend: number, plannedSpend: number) {
   return Math.max(0, actualSpend - plannedSpend);
+}
+
+export function resolveGoalTargetAmount(
+  goal: Pick<Goal, "category" | "targetAmount">,
+  settings: Pick<FinancialSettings, "monthlyLivingExpenses" | "emergencyFundMonths">,
+) {
+  if (goal.category === "emergency") {
+    return settings.monthlyLivingExpenses * settings.emergencyFundMonths;
+  }
+  return goal.targetAmount;
+}
+
+export function calculateProjectedCompletion(currentAmount: number, targetAmount: number, monthlyContribution: number): string | null {
+  if (monthlyContribution <= 0) return null;
+  const remaining = targetAmount - currentAmount;
+  if (remaining <= 0) return null;
+
+  const monthsRemaining = Math.ceil(remaining / monthlyContribution);
+  const projected = new Date();
+  projected.setMonth(projected.getMonth() + monthsRemaining);
+  return `${projected.getFullYear()}-${String(projected.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export function groupAssetsByCategory(assets: Asset[]) {
+  return {
+    financial: assets.filter((asset) => assetCategoryGroupLookup[asset.category] === "Financial"),
+    physical: assets.filter((asset) => assetCategoryGroupLookup[asset.category] === "Physical"),
+    business: assets.filter((asset) => assetCategoryGroupLookup[asset.category] === "Business"),
+    other: assets.filter((asset) => assetCategoryGroupLookup[asset.category] === "Other"),
+  };
 }

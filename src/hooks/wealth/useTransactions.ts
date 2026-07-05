@@ -9,6 +9,7 @@ import { useWealthSnapshot } from "./useWealthSnapshot";
 export function useTransactions() {
   const { transactions, settings, activeExchangeRate } = useWealthSnapshot();
   const setTransactions = useWealthStore((state) => state.setTransactions);
+  const setGoals = useWealthStore((state) => state.setGoals);
 
   function computeConvertedAmount(amount: number, currency: string): number {
     if (currency === settings.spendingCurrency) return amount;
@@ -21,12 +22,26 @@ export function useTransactions() {
     return { id: existingId ?? crypto.randomUUID(), ...values, categoryId, convertedAmount };
   }
 
+  async function refreshGoalsAfterAllocation() {
+    try {
+      setGoals(await wealthService.getGoals());
+    } catch {
+      // Best-effort refresh — the DB trigger already applied the allocation regardless;
+      // a failed refetch just means the Goals page shows stale balances until next load.
+    }
+  }
+
   async function createTransaction(values: TransactionFormValues): Promise<boolean> {
     try {
       const created = buildTransaction(values);
       await wealthService.createTransaction(created);
       setTransactions([created, ...transactions]);
-      Success("Transaction added.");
+      if (created.type === "income") {
+        await refreshGoalsAfterAllocation();
+        Success("Transaction added. Goal balances updated.");
+      } else {
+        Success("Transaction added.");
+      }
       return true;
     } catch (error) {
       ErrorToast(error instanceof Error ? error.message : "Failed to save transaction.");
@@ -39,7 +54,12 @@ export function useTransactions() {
       const updated = buildTransaction(values, existing.id);
       await wealthService.updateTransaction(updated);
       setTransactions(transactions.map((transaction) => (transaction.id === updated.id ? updated : transaction)));
-      Success("Transaction updated.");
+      if (existing.type === "expense" && updated.type === "income") {
+        await refreshGoalsAfterAllocation();
+        Success("Transaction updated. Goal balances updated.");
+      } else {
+        Success("Transaction updated.");
+      }
       return true;
     } catch (error) {
       ErrorToast(error instanceof Error ? error.message : "Failed to save transaction.");

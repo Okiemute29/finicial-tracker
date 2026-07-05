@@ -1,24 +1,39 @@
-import type { Asset, BudgetCategory, FinancialSettings, Goal, IncomeSource, Liability, MonthlyReview, Transaction } from "../../models/wealth/types";
+import type {
+  Asset,
+  BudgetCategory,
+  FinancialSettings,
+  Goal,
+  GoalAllocation,
+  IncomeSource,
+  Liability,
+  MonthlyReview,
+  NetWorthSnapshot,
+  Transaction,
+} from "../../models/wealth/types";
 import { assets, budgetCategories, financialSettings, goals, liabilities, monthlyReviews, transactions } from "../../mocks/wealth.mock";
 import { supabase } from "../supabase/client";
 import {
   mapAssetRow,
   mapBudgetCategoryRow,
   mapFinancialSettingsRow,
+  mapGoalAllocationRow,
   mapGoalRow,
   mapIncomeSourceRow,
   mapLiabilityRow,
   mapMonthlyReviewRow,
+  mapNetWorthSnapshotRow,
   mapTransactionRow,
 } from "./wealth.mappers";
 import type {
   AssetRow,
   BudgetCategoryRow,
   FinancialSettingsRow,
+  GoalAllocationRow,
   GoalRow,
   IncomeSourceRow,
   LiabilityRow,
   MonthlyReviewRow,
+  NetWorthSnapshotRow,
   TransactionRow,
 } from "./wealth.mappers";
 
@@ -38,11 +53,16 @@ async function getFinancialSettings(): Promise<FinancialSettings> {
 
 function toFinancialSettingsPayload(settings: FinancialSettings) {
   return {
+    full_name: settings.fullName,
     earning_currency: settings.earningCurrency,
     spending_currency: settings.spendingCurrency,
     manual_exchange_rate_enabled: settings.manualExchangeRateEnabled,
     manual_exchange_rate: settings.manualExchangeRate,
     cached_exchange_rate: settings.cachedExchangeRate,
+    monthly_living_expenses: settings.monthlyLivingExpenses,
+    emergency_fund_months: settings.emergencyFundMonths,
+    email_alerts_enabled: settings.emailAlertsEnabled,
+    theme: settings.theme,
   };
 }
 
@@ -154,10 +174,16 @@ async function getGoals(): Promise<Goal[]> {
 function toGoalPayload(goal: Goal) {
   return {
     name: goal.name,
+    description: goal.description,
+    category: goal.category,
+    priority: goal.priority,
+    contribution_percentage: goal.contributionPercentage,
     target_amount: goal.targetAmount,
     current_amount: goal.currentAmount,
     currency: goal.currency,
     status: goal.status,
+    target_type: goal.targetType,
+    is_auto_funded: goal.isAutoFunded,
     due_date: goal.dueDate ?? null,
   };
 }
@@ -192,6 +218,7 @@ function toTransactionPayload(transaction: Transaction) {
   return {
     type: transaction.type,
     category_id: transaction.categoryId ?? null,
+    category: transaction.category ?? null,
     description: transaction.description,
     amount: transaction.amount,
     currency: transaction.currency,
@@ -234,7 +261,7 @@ async function getLiabilities(): Promise<Liability[]> {
 }
 
 function toNetWorthItemPayload(item: Asset | Liability) {
-  return { name: item.name, value: item.value, currency: item.currency };
+  return { name: item.name, value: item.value, currency: item.currency, category: item.category };
 }
 
 async function createNetWorthItem(table: "assets" | "liabilities", item: Asset | Liability, userId: string): Promise<void> {
@@ -299,9 +326,49 @@ async function upsertMonthlyReview(review: MonthlyReview): Promise<void> {
       planned_spend: review.plannedSpend,
       actual_spend: review.actualSpend,
       savings: review.savings,
+      savings_rate: review.savingsRate ?? 0,
+      net_worth_snapshot: review.netWorthSnapshot ?? 0,
       notes: review.notes,
+      what_went_well: review.whatWentWell ?? "",
+      what_could_improve: review.whatCouldImprove ?? "",
+      biggest_win: review.biggestWin ?? "",
+      lessons_learned: review.lessonsLearned ?? "",
+      auto_summary: review.autoSummary ?? "",
     },
     { onConflict: "user_id,month" },
+  );
+  if (error) throw error;
+}
+
+async function getGoalAllocations(): Promise<GoalAllocation[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from("goal_allocations").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return ((data ?? []) as GoalAllocationRow[]).map(mapGoalAllocationRow);
+}
+
+async function getNetWorthSnapshots(): Promise<NetWorthSnapshot[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from("net_worth_snapshots").select("*").order("captured_at", { ascending: true });
+  if (error) throw error;
+  return ((data ?? []) as NetWorthSnapshotRow[]).map(mapNetWorthSnapshotRow);
+}
+
+type NetWorthSnapshotInput = { totalAssets: number; totalLiabilities: number; netWorth: number };
+
+async function upsertNetWorthSnapshot(input: NetWorthSnapshotInput): Promise<void> {
+  if (!supabase) return;
+  const userId = await getCurrentUserId();
+  const capturedAt = new Date().toISOString().slice(0, 10);
+  const { error } = await supabase.from("net_worth_snapshots").upsert(
+    {
+      user_id: userId,
+      captured_at: capturedAt,
+      total_assets: input.totalAssets,
+      total_liabilities: input.totalLiabilities,
+      net_worth: input.netWorth,
+    },
+    { onConflict: "user_id,captured_at" },
   );
   if (error) throw error;
 }
@@ -378,6 +445,9 @@ export const wealthService = {
   updateLiability,
   deleteLiability,
   upsertMonthlyReview,
+  getGoalAllocations,
+  getNetWorthSnapshots,
+  upsertNetWorthSnapshot,
   updateFinancialSettings,
   createIncomeSource,
   updateIncomeSource,

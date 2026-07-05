@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Asset, BudgetCategory, Liability, Transaction } from "../models/wealth/types";
 import {
   budgetPercentageTotal,
@@ -6,7 +6,10 @@ import {
   calculateGoalProgress,
   calculateNetWorth,
   calculateOverspend,
+  calculateProjectedCompletion,
+  groupAssetsByCategory,
   isBudgetBalanced,
+  resolveGoalTargetAmount,
   summarizeMonthlyTransactions,
   summarizeTransactions,
 } from "./wealthCalculations";
@@ -75,10 +78,10 @@ describe("calculateGoalProgress", () => {
 describe("calculateNetWorth", () => {
   it("sums assets and liabilities and subtracts", () => {
     const assets: Asset[] = [
-      { id: "a1", name: "Savings", value: 8000, currency: "USD" },
-      { id: "a2", name: "Car", value: 5000, currency: "USD" },
+      { id: "a1", name: "Savings", value: 8000, currency: "USD", category: "savings" },
+      { id: "a2", name: "Car", value: 5000, currency: "USD", category: "car" },
     ];
-    const liabilities: Liability[] = [{ id: "l1", name: "Loan", value: 3000, currency: "USD" }];
+    const liabilities: Liability[] = [{ id: "l1", name: "Loan", value: 3000, currency: "USD", category: "personal_loan" }];
     expect(calculateNetWorth(assets, liabilities)).toEqual({ totalAssets: 13000, totalLiabilities: 3000, netWorth: 10000 });
   });
 
@@ -87,8 +90,8 @@ describe("calculateNetWorth", () => {
   });
 
   it("allows a negative net worth when liabilities exceed assets", () => {
-    const assets: Asset[] = [{ id: "a1", name: "Cash", value: 1000, currency: "USD" }];
-    const liabilities: Liability[] = [{ id: "l1", name: "Debt", value: 5000, currency: "USD" }];
+    const assets: Asset[] = [{ id: "a1", name: "Cash", value: 1000, currency: "USD", category: "cash" }];
+    const liabilities: Liability[] = [{ id: "l1", name: "Debt", value: 5000, currency: "USD", category: "other_debt" }];
     expect(calculateNetWorth(assets, liabilities).netWorth).toBe(-4000);
   });
 });
@@ -139,5 +142,69 @@ describe("calculateOverspend", () => {
 
   it("returns 0 when spending exactly matches the plan", () => {
     expect(calculateOverspend(1000, 1000)).toBe(0);
+  });
+});
+
+describe("resolveGoalTargetAmount", () => {
+  const settings = { monthlyLivingExpenses: 500000, emergencyFundMonths: 6 };
+
+  it("computes the emergency fund target from monthly living expenses × months", () => {
+    expect(resolveGoalTargetAmount({ category: "emergency", targetAmount: 3000000 }, settings)).toBe(3000000);
+  });
+
+  it("reflects settings changes even if the stored target is stale", () => {
+    expect(resolveGoalTargetAmount({ category: "emergency", targetAmount: 999 }, { monthlyLivingExpenses: 400000, emergencyFundMonths: 3 })).toBe(1200000);
+  });
+
+  it("returns the stored target amount for non-emergency goals", () => {
+    expect(resolveGoalTargetAmount({ category: "rent", targetAmount: 1800000 }, settings)).toBe(1800000);
+  });
+});
+
+describe("calculateProjectedCompletion", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("projects a completion month from the remaining amount and monthly contribution", () => {
+    expect(calculateProjectedCompletion(0, 1200, 400)).toBe("2026-04");
+  });
+
+  it("returns null when the goal is already met", () => {
+    expect(calculateProjectedCompletion(1200, 1000, 400)).toBeNull();
+  });
+
+  it("returns null when there is no monthly contribution", () => {
+    expect(calculateProjectedCompletion(0, 1000, 0)).toBeNull();
+  });
+});
+
+describe("groupAssetsByCategory", () => {
+  function makeAsset(overrides: Partial<Asset> = {}): Asset {
+    return { id: "a1", name: "Asset", value: 100, currency: "USD", category: "other", ...overrides };
+  }
+
+  it("groups assets into financial, physical, business, and other buckets", () => {
+    const assets = [
+      makeAsset({ id: "a1", category: "cash" }),
+      makeAsset({ id: "a2", category: "laptop" }),
+      makeAsset({ id: "a3", category: "domains" }),
+      makeAsset({ id: "a4", category: "other" }),
+    ];
+    const grouped = groupAssetsByCategory(assets);
+    expect(grouped.financial.map((a) => a.id)).toEqual(["a1"]);
+    expect(grouped.physical.map((a) => a.id)).toEqual(["a2"]);
+    expect(grouped.business.map((a) => a.id)).toEqual(["a3"]);
+    expect(grouped.other.map((a) => a.id)).toEqual(["a4"]);
+  });
+
+  it("returns empty groups for an empty list", () => {
+    const grouped = groupAssetsByCategory([]);
+    expect(grouped).toEqual({ financial: [], physical: [], business: [], other: [] });
   });
 });

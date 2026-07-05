@@ -8,6 +8,10 @@ const variants: Record<string, string> = {
   expense: "bg-red-600/10 text-red-700",
   balanced: "bg-green-600/10 text-green-700",
   warning: "bg-amber-500/10 text-amber-700",
+  critical: "bg-red-600/10 text-red-700",
+  high: "bg-amber-500/10 text-amber-700",
+  medium: "bg-blue-600/10 text-blue-700",
+  low: "bg-slate-500/10 text-slate-600",
   default: "bg-slate-500/10 text-slate-600",
 };
 

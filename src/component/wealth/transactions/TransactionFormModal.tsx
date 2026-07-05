@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Button from "../../buttons/button";
+import { expenseCategoryOptions, incomeCategoryOptions } from "../../../constants/transactionCategories";
 import AuthGeneralInput from "../../input/authinput";
 import Select from "../../input/select";
 import Modal from "../../modal/modal";
@@ -10,6 +11,7 @@ import type { BudgetCategory, Transaction } from "../../../models/wealth/types";
 
 const transactionSchema = z.object({
   type: z.enum(["income", "expense"]),
+  category: z.string().min(1, "Category is required."),
   categoryId: z.string().optional(),
   description: z.string().min(1, "Description is required."),
   amount: z.number().positive("Amount must be greater than 0."),
@@ -45,19 +47,11 @@ export default function TransactionFormModal({
   currencyOptions,
   defaultCurrency,
 }: TransactionFormModalProps) {
-  const categoryOptions = [{ label: "No category", value: "" }, ...budgetCategories.map((category) => ({ label: category.name, value: category.id }))];
-  const emptyValues: TransactionFormValues = {
-    type: "expense",
-    categoryId: "",
-    description: "",
-    amount: 0,
-    currency: defaultCurrency,
-    date: new Date().toISOString().slice(0, 10),
-  };
+  const budgetBucketOptions = [{ label: "No bucket", value: "" }, ...budgetCategories.map((category) => ({ label: category.name, value: category.id }))];
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<TransactionFormValues>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
-    defaultValues: emptyValues,
+    defaultValues: { type: "expense", category: "Other Expense", categoryId: "", description: "", amount: 0, currency: defaultCurrency, date: new Date().toISOString().slice(0, 10) },
   });
 
   useEffect(() => {
@@ -65,6 +59,7 @@ export default function TransactionFormModal({
     if (initialValue) {
       reset({
         type: initialValue.type,
+        category: initialValue.category ?? (initialValue.type === "income" ? "Other Income" : "Other Expense"),
         categoryId: initialValue.categoryId ?? "",
         description: initialValue.description,
         amount: initialValue.amount,
@@ -72,18 +67,27 @@ export default function TransactionFormModal({
         date: initialValue.date,
       });
     } else {
-      reset({ type: "expense", categoryId: "", description: "", amount: 0, currency: defaultCurrency, date: new Date().toISOString().slice(0, 10) });
+      reset({ type: "expense", category: "Other Expense", categoryId: "", description: "", amount: 0, currency: defaultCurrency, date: new Date().toISOString().slice(0, 10) });
     }
   }, [isOpen, initialValue, reset, defaultCurrency]);
 
   const type = watch("type");
+  const category = watch("category");
+  const categoryOptions = type === "income" ? incomeCategoryOptions : expenseCategoryOptions;
+
+  useEffect(() => {
+    if (!categoryOptions.some((option) => option.value === category)) {
+      setValue("category", categoryOptions[categoryOptions.length - 1].value);
+    }
+  }, [type, category, categoryOptions, setValue]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={initialValue ? "Edit transaction" : "New transaction"} size="sm">
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <Select label="Type" options={typeOptions} error={errors.type?.message} {...register("type")} />
+        <Select label="Category" options={categoryOptions} error={errors.category?.message} {...register("category")} />
         {type === "expense" ? (
-          <Select label="Category" options={categoryOptions} notrequired error={errors.categoryId?.message} {...register("categoryId")} />
+          <Select label="Budget Bucket" options={budgetBucketOptions} notrequired error={errors.categoryId?.message} {...register("categoryId")} />
         ) : null}
         <AuthGeneralInput label="Description" error={errors.description?.message} {...register("description")} />
         <div className="grid grid-cols-2 gap-4">

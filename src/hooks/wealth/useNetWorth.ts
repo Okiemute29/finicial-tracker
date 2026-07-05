@@ -1,6 +1,6 @@
 import { Error as ErrorToast, Success } from "../../component/toastify/toastify";
 import type { NetWorthItemFormValues } from "../../component/wealth/networth/AssetLiabilityFormModal";
-import type { Asset, Liability } from "../../models/wealth/types";
+import type { Asset, AssetCategory, Liability, LiabilityCategory } from "../../models/wealth/types";
 import { wealthService } from "../../services/wealth/wealth.service";
 import { useWealthStore } from "../../stores/wealthStore";
 
@@ -12,7 +12,7 @@ export function useNetWorth() {
 
   async function createAsset(values: NetWorthItemFormValues): Promise<boolean> {
     try {
-      const created: Asset = { id: crypto.randomUUID(), ...values };
+      const created: Asset = { id: crypto.randomUUID(), ...values, category: values.category as AssetCategory };
       await wealthService.createAsset(created);
       setAssets([...assets, created]);
       Success("Asset added.");
@@ -25,7 +25,7 @@ export function useNetWorth() {
 
   async function updateAsset(existing: Asset, values: NetWorthItemFormValues): Promise<boolean> {
     try {
-      const updated: Asset = { ...existing, ...values };
+      const updated: Asset = { ...existing, ...values, category: values.category as AssetCategory };
       await wealthService.updateAsset(updated);
       setAssets(assets.map((asset) => (asset.id === updated.id ? updated : asset)));
       Success("Asset updated.");
@@ -50,7 +50,7 @@ export function useNetWorth() {
 
   async function createLiability(values: NetWorthItemFormValues): Promise<boolean> {
     try {
-      const created: Liability = { id: crypto.randomUUID(), ...values };
+      const created: Liability = { id: crypto.randomUUID(), ...values, category: values.category as LiabilityCategory };
       await wealthService.createLiability(created);
       setLiabilities([...liabilities, created]);
       Success("Liability added.");
@@ -63,7 +63,7 @@ export function useNetWorth() {
 
   async function updateLiability(existing: Liability, values: NetWorthItemFormValues): Promise<boolean> {
     try {
-      const updated: Liability = { ...existing, ...values };
+      const updated: Liability = { ...existing, ...values, category: values.category as LiabilityCategory };
       await wealthService.updateLiability(updated);
       setLiabilities(liabilities.map((liability) => (liability.id === updated.id ? updated : liability)));
       Success("Liability updated.");

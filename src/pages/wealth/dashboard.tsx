@@ -2,7 +2,7 @@
 import MetricCard from "../../component/wealth/dashboard/MetricCard";
 import Text from "../../component/typography/typography";
 import { formatCurrency } from "../../helpers/currencyHelpers";
-import { calculateBudgetAmount, calculateGoalProgress, calculateOverspend, summarizeMonthlyTransactions } from "../../helpers/wealthCalculations";
+import { calculateBudgetAmount, calculateGoalProgress, calculateOverspend, resolveGoalTargetAmount, summarizeMonthlyTransactions } from "../../helpers/wealthCalculations";
 import { useWealthSnapshot } from "../../hooks/wealth/useWealthSnapshot";
 
 function currentMonth(): string {
@@ -56,7 +56,20 @@ export default function DashboardPage() {
           <Text size="lg" className="font-semibold text-slate-950">Goal Progress</Text>
           <div className="mt-5 space-y-4">
             {topGoals.map((goal) => {
-              const progress = calculateGoalProgress(goal);
+              if (goal.targetType === "ongoing") {
+                return (
+                  <div key={goal.id}>
+                    <div className="mb-1 flex items-center justify-between gap-3">
+                      <Text size="sm" className="font-medium text-slate-700">{goal.name}</Text>
+                      <Text size="xs" className="text-slate-500">{formatCurrency(goal.currentAmount, goal.currency)}</Text>
+                    </div>
+                    <Text size="xs" className="text-slate-500">Ongoing · +{goal.contributionPercentage}% of income/month</Text>
+                  </div>
+                );
+              }
+
+              const resolvedTarget = resolveGoalTargetAmount(goal, settings);
+              const progress = calculateGoalProgress({ currentAmount: goal.currentAmount, targetAmount: resolvedTarget });
               return (
                 <div key={goal.id}>
                   <div className="mb-2 flex items-center justify-between gap-3">

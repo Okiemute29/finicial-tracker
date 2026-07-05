@@ -58,13 +58,14 @@ export default function TransactionsPage() {
         <Button size="sm" leftIcon="plus" onClick={openCreateModal} type="button">New transaction</Button>
       </div>
       <DataTable
-        columns={[{ header: "Date" }, { header: "Description" }, { header: "Type" }, { header: "Amount" }, { header: "Converted" }, { header: "" }]}
+        columns={[{ header: "Date" }, { header: "Description" }, { header: "Type" }, { header: "Category" }, { header: "Amount" }, { header: "Converted" }, { header: "" }]}
         data={transactions}
         renderRow={(transaction) => (
           <>
             <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 text-slate-600">{transaction.date}</td>
             <td className="border-y border-slate-200 px-4 py-4 font-medium text-slate-900">{transaction.description}</td>
             <td className="border-y border-slate-200 px-4 py-4"><StatusBadge label={transaction.type} /></td>
+            <td className="border-y border-slate-200 px-4 py-4 text-slate-600">{transaction.category ?? "—"}</td>
             <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(transaction.amount, transaction.currency)}</td>
             <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(transaction.convertedAmount, settings.spendingCurrency)}</td>
             <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">
