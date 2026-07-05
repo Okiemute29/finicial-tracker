@@ -42,3 +42,7 @@ export function summarizeTransactions(transactions: Transaction[]) {
 export function summarizeMonthlyTransactions(transactions: Transaction[], month: string) {
   return summarizeTransactions(transactions.filter((transaction) => transaction.date.startsWith(month)));
 }
+
+export function calculateOverspend(actualSpend: number, plannedSpend: number) {
+  return Math.max(0, actualSpend - plannedSpend);
+}

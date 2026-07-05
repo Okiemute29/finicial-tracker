@@ -3,6 +3,7 @@ import Button from "../../component/buttons/button";
 import Skeleton from "../../component/skeletons/skeleton";
 import Text from "../../component/typography/typography";
 import { useLiveExchangeRate } from "../../hooks/wealth/useLiveExchangeRate";
+import { useOverspendingAlert } from "../../hooks/wealth/useOverspendingAlert";
 import { useWealthBootstrap } from "../../hooks/wealth/useWealthBootstrap";
 import { useWealthStore } from "../../stores/wealthStore";
 import { BottomNav, Header, Sidebar } from "../partials";
@@ -10,6 +11,7 @@ import { BottomNav, Header, Sidebar } from "../partials";
 export default function RootLayout() {
   useWealthBootstrap();
   useLiveExchangeRate();
+  useOverspendingAlert();
   const status = useWealthStore((state) => state.status);
   const error = useWealthStore((state) => state.error);
   const loadWealthData = useWealthStore((state) => state.loadWealthData);

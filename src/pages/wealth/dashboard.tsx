@@ -2,11 +2,16 @@
 import MetricCard from "../../component/wealth/dashboard/MetricCard";
 import Text from "../../component/typography/typography";
 import { formatCurrency } from "../../helpers/currencyHelpers";
-import { calculateBudgetAmount, calculateGoalProgress } from "../../helpers/wealthCalculations";
+import { calculateBudgetAmount, calculateGoalProgress, calculateOverspend, summarizeMonthlyTransactions } from "../../helpers/wealthCalculations";
 import { useWealthSnapshot } from "../../hooks/wealth/useWealthSnapshot";
 
+function currentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export default function DashboardPage() {
-  const { monthlyIncome, activeExchangeRate, settings, budgetCategories, goals, netWorth } = useWealthSnapshot();
+  const { monthlyIncome, activeExchangeRate, settings, budgetCategories, goals, netWorth, transactions } = useWealthSnapshot();
   const localIncome = monthlyIncome * activeExchangeRate;
   const budgetData = budgetCategories.map((category) => ({
     name: category.name,
@@ -14,9 +19,17 @@ export default function DashboardPage() {
     color: category.color,
   }));
   const topGoals = goals.slice(0, 3);
+  const { expenses: actualSpend } = summarizeMonthlyTransactions(transactions, currentMonth());
+  const overspend = calculateOverspend(actualSpend, localIncome);
 
   return (
     <div className="space-y-6">
+      {overspend > 0 ? (
+        <Text size="sm" className="rounded-lg bg-amber-500/10 px-4 py-3 text-amber-700">
+          You&apos;ve spent {formatCurrency(overspend, settings.spendingCurrency)} more than planned this month.
+        </Text>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard accent label="Monthly Income" value={formatCurrency(monthlyIncome, settings.earningCurrency)} change="All income sources combined" icon="money" />
         <MetricCard label="Local Budget Base" value={formatCurrency(localIncome, settings.spendingCurrency)} change="Converted with active exchange rate" icon="budget" />

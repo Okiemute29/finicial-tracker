@@ -5,6 +5,7 @@ import {
   calculateBudgetAmount,
   calculateGoalProgress,
   calculateNetWorth,
+  calculateOverspend,
   isBudgetBalanced,
   summarizeMonthlyTransactions,
   summarizeTransactions,
@@ -124,5 +125,19 @@ describe("summarizeMonthlyTransactions", () => {
 
   it("returns zeros when no transactions match the month", () => {
     expect(summarizeMonthlyTransactions([makeTransaction({ date: "2026-01-01" })], "2026-07")).toEqual({ income: 0, expenses: 0, savings: 0 });
+  });
+});
+
+describe("calculateOverspend", () => {
+  it("returns the amount spent beyond the plan", () => {
+    expect(calculateOverspend(1200, 1000)).toBe(200);
+  });
+
+  it("returns 0 when spending is within plan", () => {
+    expect(calculateOverspend(800, 1000)).toBe(0);
+  });
+
+  it("returns 0 when spending exactly matches the plan", () => {
+    expect(calculateOverspend(1000, 1000)).toBe(0);
   });
 });
