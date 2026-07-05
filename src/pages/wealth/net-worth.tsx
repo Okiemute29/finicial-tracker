@@ -25,23 +25,23 @@ type AssetGroupTableProps = {
 function AssetGroupTable({ title, assets, onEdit, onDelete }: AssetGroupTableProps) {
   return (
     <div>
-      <Text size="sm" className="mb-2 font-semibold text-slate-700">{title}</Text>
+      <Text size="sm" className="mb-2 font-semibold text-slate-700 dark:text-slate-300">{title}</Text>
       {assets.length === 0 ? (
-        <Text size="xs" className="text-slate-500">No {title.toLowerCase()} assets yet.</Text>
+        <Text size="xs" className="text-slate-500 dark:text-slate-400">No {title.toLowerCase()} assets yet.</Text>
       ) : (
         <DataTable
           columns={[{ header: "Asset" }, { header: "Value" }, { header: "" }]}
           data={assets}
           renderRow={(asset) => (
             <>
-              <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium">{asset.name}</td>
-              <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(asset.value, asset.currency)}</td>
-              <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">
+              <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium dark:border-slate-700 dark:text-white">{asset.name}</td>
+              <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700 dark:text-slate-300">{formatCurrency(asset.value, asset.currency)}</td>
+              <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4 dark:border-slate-700">
                 <div className="flex items-center justify-end gap-2">
-                  <button type="button" onClick={() => onEdit(asset)} className="text-slate-400 transition hover:text-teal-700" aria-label={`Edit ${asset.name}`}>
+                  <button type="button" onClick={() => onEdit(asset)} className="text-slate-400 transition hover:text-teal-700 dark:text-slate-500 dark:hover:text-teal-400" aria-label={`Edit ${asset.name}`}>
                     <Icon name="edit" iconClass="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={() => onDelete(asset)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${asset.name}`}>
+                  <button type="button" onClick={() => onDelete(asset)} className="text-slate-400 transition hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400" aria-label={`Delete ${asset.name}`}>
                     <Icon name="trash" iconClass="h-4 w-4" />
                   </button>
                 </div>
@@ -113,8 +113,8 @@ export default function NetWorthPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Text size="2xl" className="font-bold text-slate-950">Net Worth</Text>
-        <Text size="sm" className="text-slate-500">Assets minus liabilities — clothes, food, and rent are expenses, not assets.</Text>
+        <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Net Worth</Text>
+        <Text size="sm" className="text-slate-500 dark:text-slate-400">Assets minus liabilities — clothes, food, and rent are expenses, not assets.</Text>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <MetricCard label="Total Assets" value={formatCurrency(netWorth.totalAssets, settings.earningCurrency)} icon="trend" />
@@ -122,9 +122,9 @@ export default function NetWorthPage() {
         <MetricCard accent label="Net Worth" value={formatCurrency(netWorth.netWorth, settings.earningCurrency)} icon="netWorth" />
       </div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <Text size="lg" className="font-semibold text-slate-950">Assets</Text>
+            <Text size="lg" className="font-semibold text-slate-950 dark:text-white">Assets</Text>
             <Button variant="outline" size="sm" leftIcon="plus" onClick={openCreateAsset} type="button">Add asset</Button>
           </div>
           <div className="space-y-5">
@@ -134,9 +134,9 @@ export default function NetWorthPage() {
             {groupedAssets.other.length > 0 ? <AssetGroupTable title="Other" assets={groupedAssets.other} onEdit={openEditAsset} onDelete={handleDeleteAsset} /> : null}
           </div>
         </section>
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <Text size="lg" className="font-semibold text-slate-950">Liabilities</Text>
+            <Text size="lg" className="font-semibold text-slate-950 dark:text-white">Liabilities</Text>
             <Button variant="outline" size="sm" leftIcon="plus" onClick={openCreateLiability} type="button">Add liability</Button>
           </div>
           <DataTable
@@ -144,15 +144,15 @@ export default function NetWorthPage() {
             data={liabilities}
             renderRow={(liability) => (
               <>
-                <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium">{liability.name}</td>
-                <td className="border-y border-slate-200 px-4 py-4 text-slate-600">{liabilityCategoryLabels[liability.category] ?? liability.category}</td>
-                <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(liability.value, liability.currency)}</td>
-                <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">
+                <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium dark:border-slate-700 dark:text-white">{liability.name}</td>
+                <td className="border-y border-slate-200 px-4 py-4 text-slate-600 dark:border-slate-700 dark:text-slate-300">{liabilityCategoryLabels[liability.category] ?? liability.category}</td>
+                <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700 dark:text-slate-300">{formatCurrency(liability.value, liability.currency)}</td>
+                <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4 dark:border-slate-700">
                   <div className="flex items-center justify-end gap-2">
-                    <button type="button" onClick={() => openEditLiability(liability)} className="text-slate-400 transition hover:text-teal-700" aria-label={`Edit ${liability.name}`}>
+                    <button type="button" onClick={() => openEditLiability(liability)} className="text-slate-400 transition hover:text-teal-700 dark:text-slate-500 dark:hover:text-teal-400" aria-label={`Edit ${liability.name}`}>
                       <Icon name="edit" iconClass="h-4 w-4" />
                     </button>
-                    <button type="button" onClick={() => handleDeleteLiability(liability)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${liability.name}`}>
+                    <button type="button" onClick={() => handleDeleteLiability(liability)} className="text-slate-400 transition hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400" aria-label={`Delete ${liability.name}`}>
                       <Icon name="trash" iconClass="h-4 w-4" />
                     </button>
                   </div>

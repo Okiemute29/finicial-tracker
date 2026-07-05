@@ -12,9 +12,9 @@ const navItems = [
 
 export default function BottomNav() {
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg md:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg md:hidden dark:border-slate-700 dark:bg-slate-900">
       {navItems.map((item) => (
-        <NavLink key={item.path} to={item.path} className={({ isActive }) => `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium ${isActive ? "bg-teal-700 text-white" : "text-slate-500"}`}>
+        <NavLink key={item.path} to={item.path} className={({ isActive }) => `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium ${isActive ? "bg-teal-700 text-white" : "text-slate-500 dark:text-slate-400"}`}>
           <Icon name={item.icon} iconClass="h-4 w-4" />
           {item.label}
         </NavLink>

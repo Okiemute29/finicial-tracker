@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import "./App.css";
 import routes from "./constants/routes";
 import { useAuthSession } from "./hooks/auth/useAuthSession";
+import { useThemeSync } from "./hooks/wealth/useThemeSync";
 import PrivateRoute from "./routeguard/privateroute";
 import RootLayout from "./pages/layout/Root.layout";
 import LoginPage from "./pages/auth/login";
@@ -44,6 +45,7 @@ const router = createBrowserRouter(
 
 export default function App() {
   useAuthSession();
+  useThemeSync();
 
   return (
     <>

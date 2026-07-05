@@ -51,8 +51,8 @@ export default function GoalsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Text size="2xl" className="font-bold text-slate-950">Goal Tracker</Text>
-          <Text size="sm" className="text-slate-500">Every goal below is funded automatically as a share of your income — this is the plan working for you.</Text>
+          <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Goal Tracker</Text>
+          <Text size="sm" className="text-slate-500 dark:text-slate-400">Every goal below is funded automatically as a share of your income — this is the plan working for you.</Text>
         </div>
         <Button size="sm" leftIcon="plus" onClick={openCreateModal} type="button">New goal</Button>
       </div>
@@ -65,17 +65,17 @@ export default function GoalsPage() {
           const projectedMonth = !isOngoing && goal.isAutoFunded ? calculateProjectedCompletion(goal.currentAmount, resolvedTarget, monthlyContribution) : null;
 
           return (
-            <article key={goal.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+            <article key={goal.id} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <Text size="lg" className="font-semibold text-slate-950">{goal.name}</Text>
-                  {goal.description ? <Text size="xs" className="mt-1 text-slate-500">{goal.description}</Text> : null}
+                  <Text size="lg" className="font-semibold text-slate-950 dark:text-white">{goal.name}</Text>
+                  {goal.description ? <Text size="xs" className="mt-1 text-slate-500 dark:text-slate-400">{goal.description}</Text> : null}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => openEditModal(goal)} className="text-slate-400 transition hover:text-teal-700" aria-label={`Edit ${goal.name}`}>
+                  <button type="button" onClick={() => openEditModal(goal)} className="text-slate-400 transition hover:text-teal-700 dark:text-slate-500 dark:hover:text-teal-400" aria-label={`Edit ${goal.name}`}>
                     <Icon name="edit" iconClass="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={() => handleDelete(goal)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${goal.name}`}>
+                  <button type="button" onClick={() => handleDelete(goal)} className="text-slate-400 transition hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400" aria-label={`Delete ${goal.name}`}>
                     <Icon name="trash" iconClass="h-4 w-4" />
                   </button>
                 </div>
@@ -89,20 +89,20 @@ export default function GoalsPage() {
 
               {isOngoing ? (
                 <div className="mt-4">
-                  <Text size="xl" className="font-bold text-slate-950">{formatCurrency(goal.currentAmount, goal.currency)}</Text>
-                  <Text size="xs" className="mt-1 text-slate-500">
+                  <Text size="xl" className="font-bold text-slate-950 dark:text-white">{formatCurrency(goal.currentAmount, goal.currency)}</Text>
+                  <Text size="xs" className="mt-1 text-slate-500 dark:text-slate-400">
                     Ongoing goal · {formatCurrency(monthlyContribution, goal.currency)}/month from income
                   </Text>
                 </div>
               ) : (
                 <>
-                  <Text size="sm" className="mt-4 text-slate-500">{formatCurrency(goal.currentAmount, goal.currency)} saved of {formatCurrency(resolvedTarget, goal.currency)}</Text>
-                  <div className="mt-2 h-2 rounded-full bg-slate-100">
+                  <Text size="sm" className="mt-4 text-slate-500 dark:text-slate-400">{formatCurrency(goal.currentAmount, goal.currency)} saved of {formatCurrency(resolvedTarget, goal.currency)}</Text>
+                  <div className="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-800">
                     <div className="h-2 rounded-full bg-teal-700" style={{ width: `${progress}%` }} />
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <Text size="xs" className="text-slate-500">{progress}% complete</Text>
-                    {projectedMonth ? <Text size="xs" className="text-slate-500">On pace for {formatProjectedDate(projectedMonth)}</Text> : null}
+                    <Text size="xs" className="text-slate-500 dark:text-slate-400">{progress}% complete</Text>
+                    {projectedMonth ? <Text size="xs" className="text-slate-500 dark:text-slate-400">On pace for {formatProjectedDate(projectedMonth)}</Text> : null}
                   </div>
                 </>
               )}

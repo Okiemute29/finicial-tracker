@@ -11,7 +11,7 @@ export default function Toggle({ checked, onChange, disabled = false }: TogglePr
       aria-pressed={checked}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`h-7 w-12 rounded-full p-1 transition disabled:opacity-50 ${checked ? "bg-teal-700" : "bg-slate-300"}`}
+      className={`h-7 w-12 rounded-full p-1 transition disabled:opacity-50 ${checked ? "bg-teal-700" : "bg-slate-300 dark:bg-slate-700"}`}
     >
       <span className={`block h-5 w-5 rounded-full bg-white transition ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>

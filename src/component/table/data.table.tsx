@@ -18,17 +18,17 @@ export default function DataTable<T>({ columns, data, renderRow, renderMobileCar
       <div className={renderMobileCard ? "hidden overflow-x-auto md:block" : "overflow-x-auto"}>
         <table className="w-full border-separate border-spacing-y-2 text-sm">
           <thead>
-            <tr className="bg-slate-100">
+            <tr className="bg-slate-100 dark:bg-slate-800">
               {columns.map((column, index) => (
-                <th key={column.header} className={`border-y border-slate-200 px-4 py-4 text-left ${index === 0 ? "rounded-l-lg border-l" : ""} ${index === columns.length - 1 ? "rounded-r-lg border-r" : ""} ${column.hidden ?? ""}`}>
-                  <Text size="sm" className="font-semibold text-slate-700">{column.header}</Text>
+                <th key={column.header} className={`border-y border-slate-200 px-4 py-4 text-left dark:border-slate-700 ${index === 0 ? "rounded-l-lg border-l" : ""} ${index === columns.length - 1 ? "rounded-r-lg border-r" : ""} ${column.hidden ?? ""}`}>
+                  <Text size="sm" className="font-semibold text-slate-700 dark:text-slate-300">{column.header}</Text>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {data.map((row, index) => (
-              <tr key={index} className={`bg-white transition hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`} onClick={onRowClick ? () => onRowClick(row) : undefined}>
+              <tr key={index} className={`bg-white transition hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 ${onRowClick ? "cursor-pointer" : ""}`} onClick={onRowClick ? () => onRowClick(row) : undefined}>
                 {renderRow(row, index)}
               </tr>
             ))}

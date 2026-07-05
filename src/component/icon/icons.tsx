@@ -1,12 +1,15 @@
 ﻿import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   BarChart3,
+  Bell,
   CalendarDays,
   Check,
   ChevronDown,
   CircleDollarSign,
   CreditCard,
+  Download,
   Eye,
   EyeOff,
   Goal,
@@ -23,20 +26,24 @@
   Sun,
   Trash2,
   TrendingUp,
+  User,
   Wallet,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {
+  alertTriangle: AlertTriangle,
   arrowLeft: ArrowLeft,
   arrowRight: ArrowRight,
+  bell: Bell,
   budget: PiggyBank,
   calendar: CalendarDays,
   check: Check,
   chevronDown: ChevronDown,
   close: X,
   dashboard: LayoutDashboard,
+  download: Download,
   eye: Eye,
   eyeOff: EyeOff,
   goal: Goal,
@@ -55,6 +62,7 @@ const icons: Record<string, LucideIcon> = {
   transaction: CreditCard,
   trend: TrendingUp,
   chart: BarChart3,
+  user: User,
 };
 
 type IconProps = {

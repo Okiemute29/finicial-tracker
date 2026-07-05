@@ -1,5 +1,6 @@
 ﻿import { assetCategoryGroupLookup } from "../constants/netWorthCategories";
-import type { Asset, BudgetCategory, FinancialSettings, Goal, GoalCategory, Liability, NetWorthSnapshot, Transaction } from "../models/wealth/types";
+import { formatCurrency } from "./currencyHelpers";
+import type { Asset, BudgetCategory, CurrencyCode, FinancialSettings, Goal, GoalCategory, Liability, NetWorthSnapshot, Transaction } from "../models/wealth/types";
 
 const SAVINGS_GOAL_CATEGORIES: GoalCategory[] = ["rent", "emergency", "wedding", "investment", "business"];
 
@@ -184,5 +185,40 @@ export function generateCoachMessage(input: CoachMessageInput): string {
   }
 
   sentences.push("Keep going.");
+  return sentences.join(" ");
+}
+
+export function calculateReviewSavingsRate(savings: number, plannedSpend: number): number {
+  if (plannedSpend <= 0) return 0;
+  return Math.round((savings / plannedSpend) * 100);
+}
+
+export function generateReviewSummary(transactions: Transaction[], month: string, currency: CurrencyCode): string {
+  const monthTransactions = transactions.filter((transaction) => transaction.date.startsWith(month));
+  if (monthTransactions.length === 0) {
+    return "No transactions recorded this month yet.";
+  }
+
+  const { income, expenses, savings } = summarizeTransactions(monthTransactions);
+  const expenseTransactions = monthTransactions.filter((transaction) => transaction.type === "expense");
+
+  const totalsByCategory = new Map<string, number>();
+  for (const transaction of expenseTransactions) {
+    const key = transaction.category ?? "Uncategorized";
+    totalsByCategory.set(key, (totalsByCategory.get(key) ?? 0) + transaction.convertedAmount);
+  }
+  const topCategory = [...totalsByCategory.entries()].sort((a, b) => b[1] - a[1])[0];
+
+  const sentences = [
+    `You earned ${formatCurrency(income, currency)} and spent ${formatCurrency(expenses, currency)} across ${expenseTransactions.length} expense transaction${expenseTransactions.length === 1 ? "" : "s"} this month.`,
+  ];
+  if (topCategory) {
+    sentences.push(`Your biggest expense category was ${topCategory[0]} at ${formatCurrency(topCategory[1], currency)}.`);
+  }
+  sentences.push(
+    savings >= 0
+      ? `You saved ${formatCurrency(savings, currency)} overall.`
+      : `You spent ${formatCurrency(Math.abs(savings), currency)} more than you earned.`,
+  );
   return sentences.join(" ");
 }

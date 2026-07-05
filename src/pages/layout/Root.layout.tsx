@@ -20,7 +20,7 @@ export default function RootLayout() {
 
   if (status === "idle" || status === "loading") {
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-100 p-6">
+      <div className="grid min-h-screen place-items-center bg-slate-100 p-6 dark:bg-slate-950">
         <Skeleton className="h-10 w-40" />
       </div>
     );
@@ -28,10 +28,10 @@ export default function RootLayout() {
 
   if (status === "error") {
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-100 p-6">
-        <div className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 text-center shadow-sm">
-          <Text size="lg" className="font-semibold text-slate-950">Couldn&apos;t load your data</Text>
-          <Text size="sm" className="text-slate-500">{error}</Text>
+      <div className="grid min-h-screen place-items-center bg-slate-100 p-6 dark:bg-slate-950">
+        <div className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-slate-900">
+          <Text size="lg" className="font-semibold text-slate-950 dark:text-white">Couldn&apos;t load your data</Text>
+          <Text size="sm" className="text-slate-500 dark:text-slate-400">{error}</Text>
           <Button onClick={() => loadWealthData()} type="button">Retry</Button>
         </div>
       </div>
@@ -39,11 +39,11 @@ export default function RootLayout() {
   }
 
   return (
-    <div className="flex min-h-screen gap-4 bg-slate-100 p-3 md:p-4">
+    <div className="flex min-h-screen gap-4 bg-slate-100 p-3 md:p-4 dark:bg-slate-950">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col gap-4 pb-24 md:pb-0">
         <Header />
-        <main className="min-h-[calc(100vh-8rem)] rounded-2xl border border-slate-200 bg-white/70 p-4 md:p-6">
+        <main className="min-h-[calc(100vh-8rem)] rounded-2xl border border-slate-200 bg-white/70 p-4 md:p-6 dark:border-slate-800 dark:bg-slate-900/70">
           <Outlet />
         </main>
       </div>

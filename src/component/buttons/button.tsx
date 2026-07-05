@@ -9,9 +9,9 @@ const padding = {
 
 const variants = {
   primary: "bg-teal-700 text-white hover:bg-teal-800",
-  secondary: "bg-slate-900 text-white hover:bg-slate-800",
-  outline: "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50",
-  ghost: "bg-transparent text-slate-700 hover:bg-slate-100",
+  secondary: "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600",
+  outline: "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800",
+  ghost: "bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
   danger: "bg-red-600 text-white hover:bg-red-700",
 };
 

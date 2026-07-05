@@ -20,7 +20,7 @@ export default function PasswordInput({ label = "Password", ...rest }: PasswordI
         <button
           type="button"
           onClick={toggle}
-          className="text-slate-400 transition hover:text-slate-600"
+          className="text-slate-400 transition hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
           aria-label={isVisible ? "Hide password" : "Show password"}
         >
           <Icon name={isVisible ? "eyeOff" : "eye"} iconClass="h-4 w-4" />

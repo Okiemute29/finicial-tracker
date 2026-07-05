@@ -47,17 +47,17 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-100 p-6">
-      <form className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm" onSubmit={handleSubmit(onSubmit)}>
-        <Text size="2xl" className="font-bold text-slate-950">Create an account</Text>
-        <Text size="sm" className="mt-1 text-slate-500">Set up your Robert Wealth account.</Text>
+    <div className="grid min-h-screen place-items-center bg-slate-100 p-6 dark:bg-slate-950">
+      <form className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900" onSubmit={handleSubmit(onSubmit)}>
+        <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Create an account</Text>
+        <Text size="sm" className="mt-1 text-slate-500 dark:text-slate-400">Set up your Robert Wealth account.</Text>
         <div className="mt-6 space-y-4">
           <AuthGeneralInput label="Email" type="email" placeholder="you@example.com" error={errors.email?.message} {...register("email")} />
           <PasswordInput label="Password" placeholder="Password" error={errors.password?.message} {...register("password")} />
           <PasswordInput label="Confirm Password" placeholder="Confirm password" error={errors.confirmPassword?.message} {...register("confirmPassword")} />
           <Button fullWidth type="submit" loading={submitting}>Sign up</Button>
         </div>
-        <Text size="sm" className="mt-5 text-center text-slate-500">
+        <Text size="sm" className="mt-5 text-center text-slate-500 dark:text-slate-400">
           Already have an account?{" "}
           <Link to={routes.signin} className="font-semibold text-teal-700 hover:text-teal-800">Sign in</Link>
         </Text>

@@ -1,5 +1,9 @@
 ﻿@import "tailwindcss";
 
+/* Class-based dark mode (toggled on <html> by useThemeSync), not just prefers-color-scheme.
+   The actual dark: utility classes across components land in a later pass. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   color: #18202f;
   background: #f5f7fb;

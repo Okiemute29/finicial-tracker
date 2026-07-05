@@ -11,8 +11,10 @@ import {
   calculateNetWorthTrend,
   calculateOverspend,
   calculateProjectedCompletion,
+  calculateReviewSavingsRate,
   calculateSavingsRate,
   generateCoachMessage,
+  generateReviewSummary,
   getUpcomingGoalEvents,
   groupAssetsByCategory,
   isBudgetBalanced,
@@ -378,5 +380,46 @@ describe("generateCoachMessage", () => {
     const message = generateCoachMessage({ fullName: null, goals, monthlyIncomeLocal: 1000, settings });
     expect(message).toContain("already fully funded");
     expect(message.startsWith("Good")).toBe(true);
+  });
+});
+
+describe("calculateReviewSavingsRate", () => {
+  it("computes savings as a percentage of planned spend", () => {
+    expect(calculateReviewSavingsRate(300, 1000)).toBe(30);
+  });
+
+  it("returns 0 when planned spend is 0 to avoid dividing by zero", () => {
+    expect(calculateReviewSavingsRate(300, 0)).toBe(0);
+  });
+
+  it("allows a negative rate when savings are negative", () => {
+    expect(calculateReviewSavingsRate(-200, 1000)).toBe(-20);
+  });
+});
+
+describe("generateReviewSummary", () => {
+  it("summarizes income, expenses, and the top expense category for the month", () => {
+    const transactions = [
+      makeTransaction({ type: "income", convertedAmount: 5000, date: "2026-07-01", category: "Salary" }),
+      makeTransaction({ type: "expense", convertedAmount: 1200, date: "2026-07-05", category: "Food" }),
+      makeTransaction({ type: "expense", convertedAmount: 300, date: "2026-07-10", category: "Transport" }),
+      makeTransaction({ type: "expense", convertedAmount: 999, date: "2026-08-01", category: "Food" }),
+    ];
+    const summary = generateReviewSummary(transactions, "2026-07", "USD");
+    expect(summary).toContain("across 2 expense transactions");
+    expect(summary).toContain("biggest expense category was Food");
+    expect(summary).toContain("saved");
+  });
+
+  it("notes a shortfall when expenses exceed income", () => {
+    const transactions = [
+      makeTransaction({ type: "income", convertedAmount: 500, date: "2026-07-01" }),
+      makeTransaction({ type: "expense", convertedAmount: 800, date: "2026-07-02", category: "Shopping" }),
+    ];
+    expect(generateReviewSummary(transactions, "2026-07", "USD")).toContain("more than you earned");
+  });
+
+  it("returns a placeholder message when there are no transactions that month", () => {
+    expect(generateReviewSummary([makeTransaction({ date: "2026-01-01" })], "2026-07", "USD")).toBe("No transactions recorded this month yet.");
   });
 });

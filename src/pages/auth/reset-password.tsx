@@ -41,10 +41,10 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-100 p-6">
-      <form className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm" onSubmit={handleSubmit(onSubmit)}>
-        <Text size="2xl" className="font-bold text-slate-950">Set a new password</Text>
-        <Text size="sm" className="mt-1 text-slate-500">Choose a new password for your account.</Text>
+    <div className="grid min-h-screen place-items-center bg-slate-100 p-6 dark:bg-slate-950">
+      <form className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900" onSubmit={handleSubmit(onSubmit)}>
+        <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Set a new password</Text>
+        <Text size="sm" className="mt-1 text-slate-500 dark:text-slate-400">Choose a new password for your account.</Text>
         <div className="mt-6 space-y-4">
           <PasswordInput label="New Password" placeholder="New password" error={errors.password?.message} {...register("password")} />
           <PasswordInput label="Confirm Password" placeholder="Confirm new password" error={errors.confirmPassword?.message} {...register("confirmPassword")} />

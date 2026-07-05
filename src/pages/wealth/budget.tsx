@@ -66,8 +66,8 @@ export default function BudgetPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Text size="2xl" className="font-bold text-slate-950">Budget Planner</Text>
-          <Text size="sm" className="text-slate-500">Percentages must total exactly 100%.</Text>
+          <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Budget Planner</Text>
+          <Text size="sm" className="text-slate-500 dark:text-slate-400">Percentages must total exactly 100%.</Text>
         </div>
         <div className="flex items-center gap-3">
           <StatusBadge label={balanced ? "Balanced" : `${total}% allocated`} variant={balanced ? "balanced" : "warning"} />
@@ -81,7 +81,7 @@ export default function BudgetPage() {
       </div>
 
       {!balanced ? (
-        <Text size="sm" className="rounded-lg bg-amber-500/10 px-4 py-3 text-amber-700">
+        <Text size="sm" className="rounded-lg bg-amber-500/10 px-4 py-3 text-amber-700 dark:text-amber-400">
           Percentages must total 100% before you can save — currently at {total}%.
         </Text>
       ) : null}
@@ -91,45 +91,45 @@ export default function BudgetPage() {
         data={draft}
         renderRow={(category) => (
           <>
-            <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium text-slate-900">
+            <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 font-medium text-slate-900 dark:border-slate-700 dark:text-white">
               <input
                 type="text"
                 value={category.name}
                 onChange={(event) => handleNameChange(category.id, event.target.value)}
-                className="h-10 w-full min-w-32 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700"
+                className="h-10 w-full min-w-32 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               />
             </td>
-            <td className="border-y border-slate-200 px-4 py-4">
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700">
               <input
                 type="text"
                 value={category.description}
                 onChange={(event) => handleDescriptionChange(category.id, event.target.value)}
                 placeholder="What is this for?"
-                className="h-10 w-full min-w-48 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700"
+                className="h-10 w-full min-w-48 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
               />
             </td>
-            <td className="border-y border-slate-200 px-4 py-4">
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700">
               <input
                 type="number"
                 min={0}
                 max={100}
                 value={category.percentage}
                 onChange={(event) => handlePercentageChange(category.id, event.target.value)}
-                className="h-10 w-20 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700"
+                className="h-10 w-20 rounded-lg border border-slate-200 px-3 text-sm outline-none transition focus:border-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               />
-              <span className="ml-1 text-slate-500">%</span>
+              <span className="ml-1 text-slate-500 dark:text-slate-400">%</span>
             </td>
-            <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(calculateBudgetAmount(localIncome, category.percentage), settings.spendingCurrency)}</td>
-            <td className="border-y border-slate-200 px-4 py-4">
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700 dark:text-slate-300">{formatCurrency(calculateBudgetAmount(localIncome, category.percentage), settings.spendingCurrency)}</td>
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700">
               <input
                 type="color"
                 value={category.color}
                 onChange={(event) => handleColorChange(category.id, event.target.value)}
-                className="h-9 w-9 cursor-pointer rounded-full border border-slate-200 p-0.5"
+                className="h-9 w-9 cursor-pointer rounded-full border border-slate-200 p-0.5 dark:border-slate-700"
               />
             </td>
-            <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4 text-right">
-              <button type="button" onClick={() => handleDeleteCategory(category.id)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${category.name}`}>
+            <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4 text-right dark:border-slate-700">
+              <button type="button" onClick={() => handleDeleteCategory(category.id)} className="text-slate-400 transition hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400" aria-label={`Delete ${category.name}`}>
                 <Icon name="trash" iconClass="h-4 w-4" />
               </button>
             </td>

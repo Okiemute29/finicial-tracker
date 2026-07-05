@@ -422,6 +422,32 @@ async function getDashboardSnapshot() {
   };
 }
 
+async function exportAllUserData() {
+  const [snapshot, allocations] = await Promise.all([getDashboardSnapshot(), getGoalAllocations()]);
+  return { ...snapshot, goalAllocations: allocations, exportedAt: new Date().toISOString() };
+}
+
+const USER_DATA_TABLES = [
+  "goal_allocations",
+  "transactions",
+  "goals",
+  "budget_categories",
+  "assets",
+  "liabilities",
+  "monthly_reviews",
+  "net_worth_snapshots",
+  "income_sources",
+] as const;
+
+async function deleteAllUserData(): Promise<void> {
+  const client = supabase;
+  if (!client) return;
+  const userId = await getCurrentUserId();
+  const results = await Promise.all(USER_DATA_TABLES.map((table) => client.from(table).delete().eq("user_id", userId)));
+  const failed = results.find((result) => result.error);
+  if (failed?.error) throw failed.error;
+}
+
 export const wealthService = {
   getFinancialSettings,
   getBudgetCategories,
@@ -454,4 +480,6 @@ export const wealthService = {
   createIncomeSource,
   updateIncomeSource,
   deleteIncomeSource,
+  exportAllUserData,
+  deleteAllUserData,
 };

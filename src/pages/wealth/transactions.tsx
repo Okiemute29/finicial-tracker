@@ -52,8 +52,8 @@ export default function TransactionsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Text size="2xl" className="font-bold text-slate-950">Transactions</Text>
-          <Text size="sm" className="text-slate-500">Income and expense records with converted local values.</Text>
+          <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Transactions</Text>
+          <Text size="sm" className="text-slate-500 dark:text-slate-400">Income and expense records with converted local values.</Text>
         </div>
         <Button size="sm" leftIcon="plus" onClick={openCreateModal} type="button">New transaction</Button>
       </div>
@@ -62,18 +62,18 @@ export default function TransactionsPage() {
         data={transactions}
         renderRow={(transaction) => (
           <>
-            <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 text-slate-600">{transaction.date}</td>
-            <td className="border-y border-slate-200 px-4 py-4 font-medium text-slate-900">{transaction.description}</td>
-            <td className="border-y border-slate-200 px-4 py-4"><StatusBadge label={transaction.type} /></td>
-            <td className="border-y border-slate-200 px-4 py-4 text-slate-600">{transaction.category ?? "—"}</td>
-            <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(transaction.amount, transaction.currency)}</td>
-            <td className="border-y border-slate-200 px-4 py-4">{formatCurrency(transaction.convertedAmount, settings.spendingCurrency)}</td>
-            <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4">
+            <td className="rounded-l-lg border-y border-l border-slate-200 px-4 py-4 text-slate-600 dark:border-slate-700 dark:text-slate-300">{transaction.date}</td>
+            <td className="border-y border-slate-200 px-4 py-4 font-medium text-slate-900 dark:border-slate-700 dark:text-white">{transaction.description}</td>
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700"><StatusBadge label={transaction.type} /></td>
+            <td className="border-y border-slate-200 px-4 py-4 text-slate-600 dark:border-slate-700 dark:text-slate-300">{transaction.category ?? "—"}</td>
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700 dark:text-slate-300">{formatCurrency(transaction.amount, transaction.currency)}</td>
+            <td className="border-y border-slate-200 px-4 py-4 dark:border-slate-700 dark:text-slate-300">{formatCurrency(transaction.convertedAmount, settings.spendingCurrency)}</td>
+            <td className="rounded-r-lg border-y border-r border-slate-200 px-4 py-4 dark:border-slate-700">
               <div className="flex items-center justify-end gap-2">
-                <button type="button" onClick={() => openEditModal(transaction)} className="text-slate-400 transition hover:text-teal-700" aria-label={`Edit ${transaction.description}`}>
+                <button type="button" onClick={() => openEditModal(transaction)} className="text-slate-400 transition hover:text-teal-700 dark:text-slate-500 dark:hover:text-teal-400" aria-label={`Edit ${transaction.description}`}>
                   <Icon name="edit" iconClass="h-4 w-4" />
                 </button>
-                <button type="button" onClick={() => handleDelete(transaction)} className="text-slate-400 transition hover:text-red-600" aria-label={`Delete ${transaction.description}`}>
+                <button type="button" onClick={() => handleDelete(transaction)} className="text-slate-400 transition hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400" aria-label={`Delete ${transaction.description}`}>
                   <Icon name="trash" iconClass="h-4 w-4" />
                 </button>
               </div>

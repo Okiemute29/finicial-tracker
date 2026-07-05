@@ -36,10 +36,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-100 p-6">
-      <form className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm" onSubmit={handleSubmit(onSubmit)}>
-        <Text size="2xl" className="font-bold text-slate-950">Sign in</Text>
-        <Text size="sm" className="mt-1 text-slate-500">Sign in with your Robert Wealth account.</Text>
+    <div className="grid min-h-screen place-items-center bg-slate-100 p-6 dark:bg-slate-950">
+      <form className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900" onSubmit={handleSubmit(onSubmit)}>
+        <Text size="2xl" className="font-bold text-slate-950 dark:text-white">Sign in</Text>
+        <Text size="sm" className="mt-1 text-slate-500 dark:text-slate-400">Sign in with your Robert Wealth account.</Text>
         <div className="mt-6 space-y-4">
           <AuthGeneralInput label="Email" type="email" placeholder="you@example.com" error={errors.email?.message} {...register("email")} />
           <div>
@@ -50,7 +50,7 @@ export default function LoginPage() {
           </div>
           <Button fullWidth type="submit" loading={submitting}>Sign in</Button>
         </div>
-        <Text size="sm" className="mt-5 text-center text-slate-500">
+        <Text size="sm" className="mt-5 text-center text-slate-500 dark:text-slate-400">
           Don&apos;t have an account?{" "}
           <Link to={routes.signup} className="font-semibold text-teal-700 hover:text-teal-800">Sign up</Link>
         </Text>

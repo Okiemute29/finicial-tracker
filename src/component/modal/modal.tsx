@@ -30,12 +30,12 @@ export default function Modal({ isOpen, onClose, title, subtitle, children, size
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-slate-950/40" />
-      <div className={`relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl ${sizes[size]}`} onClick={(event) => event.stopPropagation()}>
+      <div className={`relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl dark:bg-slate-900 ${sizes[size]}`} onClick={(event) => event.stopPropagation()}>
         {title ? (
-          <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+          <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
             <div>
-              <Text size="lg" className="font-semibold text-slate-950">{title}</Text>
-              {subtitle ? <Text size="sm" className="text-slate-500">{subtitle}</Text> : null}
+              <Text size="lg" className="font-semibold text-slate-950 dark:text-white">{title}</Text>
+              {subtitle ? <Text size="sm" className="text-slate-500 dark:text-slate-400">{subtitle}</Text> : null}
             </div>
             <Button variant="ghost" radius="md" size="sm" onClick={onClose}>Close</Button>
           </div>

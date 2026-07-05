@@ -14,9 +14,9 @@ export default function TextArea({ label, error, description, notrequired, chang
   return (
     <div>
       {label ? (
-        <label htmlFor={inputId} className="mb-1.5 flex items-center gap-1 text-sm font-medium text-slate-700">
+        <label htmlFor={inputId} className="mb-1.5 flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300">
           {label}
-          {!notrequired ? <span className="text-red-500">*</span> : null}
+          {!notrequired ? <span className="text-red-500 dark:text-red-400">*</span> : null}
         </label>
       ) : null}
       <textarea
@@ -24,11 +24,11 @@ export default function TextArea({ label, error, description, notrequired, chang
         name={name}
         required={!notrequired}
         onChange={change}
-        className={`min-h-28 w-full resize-none rounded-lg border bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-700 ${error ? "border-red-500" : "border-slate-200"} ${className}`}
+        className={`min-h-28 w-full resize-none rounded-lg border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 ${error ? "border-red-500" : "border-slate-200 dark:border-slate-700"} ${className}`}
         {...rest}
       />
-      {error ? <Text size="xs" className="mt-1 text-red-500">{error}</Text> : null}
-      {!error && description ? <Text size="xs" className="mt-1 text-slate-500">{description}</Text> : null}
+      {error ? <Text size="xs" className="mt-1 text-red-500 dark:text-red-400">{error}</Text> : null}
+      {!error && description ? <Text size="xs" className="mt-1 text-slate-500 dark:text-slate-400">{description}</Text> : null}
     </div>
   );
 }

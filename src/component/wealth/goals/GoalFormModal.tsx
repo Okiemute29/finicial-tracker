@@ -174,10 +174,10 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit, initialValue,
           <Select label="Status" options={statusOptions} error={errors.status?.message} {...register("status")} />
         </div>
         <AuthGeneralInput label="Due Date" type="date" notrequired error={errors.dueDate?.message} {...register("dueDate")} />
-        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-4">
+        <div className="flex items-center justify-between rounded-xl bg-slate-50 p-4 dark:bg-slate-800">
           <div>
-            <span className="block text-sm font-semibold text-slate-900">Auto-funded from income</span>
-            <span className="block text-xs text-slate-500">When on, a share of every income transaction is allocated here automatically.</span>
+            <span className="block text-sm font-semibold text-slate-900 dark:text-white">Auto-funded from income</span>
+            <span className="block text-xs text-slate-500 dark:text-slate-400">When on, a share of every income transaction is allocated here automatically.</span>
           </div>
           <Controller control={control} name="isAutoFunded" render={({ field }) => <Toggle checked={field.value} onChange={field.onChange} />} />
         </div>

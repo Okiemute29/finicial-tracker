@@ -15,14 +15,14 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="hidden h-full w-64 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 md:block">
+    <aside className="hidden h-full w-64 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 md:block dark:border-slate-700 dark:bg-slate-900">
       <div className="mb-8 flex items-center gap-3">
         <div className="grid h-11 w-11 place-items-center rounded-xl bg-teal-700 text-white">
           <Icon name="money" iconClass="h-6 w-6" />
         </div>
         <div>
-          <Text size="lg" className="font-bold text-slate-950">Robert Wealth</Text>
-          <Text size="xs" className="text-slate-500">Percentage finance system</Text>
+          <Text size="lg" className="font-bold text-slate-950 dark:text-white">Robert Wealth</Text>
+          <Text size="xs" className="text-slate-500 dark:text-slate-400">Percentage finance system</Text>
         </div>
       </div>
 
@@ -31,7 +31,7 @@ export default function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${isActive ? "bg-teal-700 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`}
+            className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${isActive ? "bg-teal-700 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"}`}
           >
             <Icon name={item.icon} iconClass="h-5 w-5" />
             {item.label}
